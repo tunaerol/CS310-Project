@@ -1,16 +1,24 @@
-# build_your_focus
+# Build Your Focus
 
-A new Flutter project.
+**Build Your Focus** is a gamified focusing app designed to help students stay concentrated and motivated while studying.  
+The app features a focus timer that rewards users for uninterrupted study sessions, encouraging them to build consistent habits and improve time management skills.
 
-## Getting Started
+## 🎯 Features
+- Focus timer to track study sessions  
+- Gamified reward system to increase motivation  
+- Progress tracking and virtual growth structure  
+- Simple and clean user interface built with Flutter  
 
-This project is a starting point for a Flutter application.
+## 🧠 Purpose
+This project aims to create a tool that reduces distractions and helps users stay productive by combining time management with game mechanics.
 
-A few resources to get you started if this is your first Flutter project:
+## 👥 Team Members
+- Duru İlhan (34083)  
+- İpek İnal (33788)  
+- Mehmet Emre Tekeşin (32500)  
+- Mert Can Kılıç (32140)  
+- Tuna Erol (32008)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+© 2025 Sabancı University – CS310 Mobile Application Development Project
