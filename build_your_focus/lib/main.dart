@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'Entrance/opening_page.dart';
+import 'Entrance/login_page.dart';
 
 void main(){
   runApp(const FocusApp());
@@ -20,6 +21,7 @@ class _FocusAppState extends State<FocusApp> {
       initialRoute: '/first_opening',
       routes: {
         '/first_opening' :(context) => const FirstOpening(),
+        '/login_page' : (context) => const LoginPage(),
       },
     );
   }
