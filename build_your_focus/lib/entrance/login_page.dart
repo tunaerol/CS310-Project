@@ -1,3 +1,4 @@
+import 'package:build_your_focus/screens/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -15,7 +16,7 @@ class _LoginPageState extends State<LoginPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         leading: IconButton(icon: Icon(Icons.arrow_back_ios,color: Colors.black,size: 28,), onPressed: () {
-          Navigator.popUntil(context, ModalRoute.withName('/'));
+          Navigator.popUntil(context, ModalRoute.withName('/opening_page'));
         },),
       ),
       backgroundColor: Colors.white,
@@ -116,7 +117,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 child: ElevatedButton(
                   onPressed: () {
-
+                    Navigator.pushNamed(context, '/home_page');
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.transparent,
@@ -147,7 +148,7 @@ class _LoginPageState extends State<LoginPage> {
                   Text("Don't have an account? ", style: GoogleFonts.montserrat(fontSize:13, fontWeight: FontWeight.w400 ,color: Colors.black),),
                   TextButton(
                       onPressed: (){
-
+                        Navigator.pushNamed(context, '/sign_up_page');
                       },
                       style: TextButton.styleFrom(
                         padding: EdgeInsets.zero,
@@ -165,7 +166,7 @@ class _LoginPageState extends State<LoginPage> {
               width: double.infinity,
               height: 45,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {},// it will open google account page in the phone after fire base integration
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF000000),
                   shape: RoundedRectangleBorder(

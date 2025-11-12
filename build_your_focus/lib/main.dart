@@ -1,6 +1,8 @@
+import 'package:build_your_focus/screens/home_page.dart';
 import 'package:flutter/material.dart';
-import 'Entrance/opening_page.dart';
-import 'Entrance/login_page.dart';
+import 'entrance/opening_page.dart';
+import 'entrance/login_page.dart';
+import 'entrance/sign_up_page.dart';
 
 void main(){
   runApp(const FocusApp());
@@ -18,10 +20,12 @@ class _FocusAppState extends State<FocusApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: '/first_opening',
+      initialRoute: '/opening_page',
       routes: {
-        '/first_opening' :(context) => const FirstOpening(),
+        '/opening_page' :(context) => const FirstOpening(),
         '/login_page' : (context) => const LoginPage(),
+        '/sign_up_page' : (context) => const SignUpPage(),
+        '/home_page' : (context) => const HomePage(),
       },
     );
   }

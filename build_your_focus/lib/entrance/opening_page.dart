@@ -17,18 +17,18 @@ class _FirstOpeningState extends State<FirstOpening> {
     OnboardingContent(
       title: "Focusing has never\nbeen easier",
       subtitle: "Every moment of focus builds\na new step on your path to your dreams.",
-      imagePath: "lib/assets/images/opening1.png",  // cityscape
+      imagePath: "lib/assets/images/openings/opening1.png",  // cityscape
     ),
 
     OnboardingContent(
       title: "Time is in\nyour hands",
       subtitle: "Take control of your productivity\none moment at a time.",
-      imagePath: "lib/assets/images/opening3.png", // stopwatch
+      imagePath: "lib/assets/images/openings/opening3.png", // stopwatch
     ),
     OnboardingContent(
       title: "Stay on track,\nachieve your goals",
       subtitle: "Build momentum with every\nfocused session.",
-      imagePath: "lib/assets/images/opening2.png", // candle
+      imagePath: "lib/assets/images/openings/opening2.png", // candle
     ),
   ];
 
@@ -187,7 +187,7 @@ class _FirstOpeningState extends State<FirstOpening> {
                 height: 45,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, '/signup_page');
+                    Navigator.pushNamed(context, '/sign_up_page');
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,
