@@ -8,9 +8,16 @@ class LoginPage extends StatefulWidget {
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
-
 class _LoginPageState extends State<LoginPage> {
   @override
+
+  bool _obsecure = true;
+  void _chanegeObsecure(){
+    _obsecure = !_obsecure;
+  }
+  var _controllerPassWord = TextEditingController();
+  String _text = "";
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -65,14 +72,27 @@ class _LoginPageState extends State<LoginPage> {
               decoration: BoxDecoration(
                 color: Colors.white,
               ),
-
               child: TextField(
-                style: GoogleFonts.montserrat(fontSize: 15,fontWeight: FontWeight.w600),
+                onChanged: (value){
+                  setState(() {
+                    _text = value ;
+                  });
+                },
+                controller: _controllerPassWord,
+                obscureText: _obsecure,
+                style: GoogleFonts.montserrat(fontSize:15,fontWeight: FontWeight.w600),
                 maxLines:1,
                 decoration: InputDecoration(
                   labelText: "Password",
                   labelStyle: GoogleFonts.montserrat(fontSize: 15,fontWeight: FontWeight.w600),
                   prefixIcon: Icon(Icons.lock_outline,color: Colors.black, size:25 ,),
+                  suffix: _controllerPassWord.text.isEmpty
+                    ? null
+                    : IconButton(onPressed: (){
+                      setState(() {
+                        _chanegeObsecure();
+                      });
+                  }, icon: Icon(Icons.remove_red_eye_outlined) ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(18),
                     borderSide: BorderSide(color: Color(0xFFB6B6B6),width: 2),
@@ -84,8 +104,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             ),
-
-
+            
             SizedBox(height: 20,),
             Align(
               alignment: Alignment.centerRight,
