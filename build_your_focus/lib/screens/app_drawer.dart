@@ -74,11 +74,6 @@ class _AppDrawerState extends State<AppDrawer> {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 children: [
                   const SizedBox(height: 12),
-                  _DrawerItem(
-                    icon: Icons.location_city_outlined,
-                    label: "My City",
-                    onTap: () => Navigator.pop(context),
-                  ),
                   const SizedBox(height: 16),
                   _DrawerItem(
                     icon: Icons.check_box_outlined,
@@ -105,14 +100,12 @@ class _AppDrawerState extends State<AppDrawer> {
                   ),
                   const SizedBox(height: 16),
                   _DrawerItem(
-                    icon: Icons.help_outline,
-                    label: "Help & Support",
+                    icon: Icons.location_city_outlined,
+                    label: "My City",
                     onTap: () {
                       Navigator.pop(context);
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (_) => const HelpPage()));
+                      Navigator.pushNamed(context, '/building_page');
                     },
-
                   ),
 
                   // Big space before settings pill so list fills height
@@ -165,7 +158,10 @@ class _AppDrawerState extends State<AppDrawer> {
                   ),
                   const Spacer(),
                   TextButton.icon(
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () {
+                      Navigator.pop(context); // drawer'ı kapat
+                      Navigator.pushNamed(context, '/profile_page'); // profile sayfasına git
+                    },
                     icon: const Icon(Icons.person_outline),
                     label: const Text("Profile"),
                     style: TextButton.styleFrom(

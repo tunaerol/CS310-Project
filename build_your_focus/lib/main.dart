@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'entrance/opening_page.dart';
 import 'entrance/login_page.dart';
 import 'entrance/sign_up_page.dart';
+import 'package:build_your_focus/screens/building_collection_page.dart';
+import 'package:build_your_focus/screens/profile_page.dart';
 
 void main(){
   runApp(const FocusApp());
@@ -26,6 +28,8 @@ class _FocusAppState extends State<FocusApp> {
         '/login_page' : (context) => const LoginPage(),
         '/sign_up_page' : (context) => const SignUpPage(),
         '/home_page' : (context) => const HomePage(),
+        '/building_page': (context) => const BuildingCollectionPage(),
+        '/profile_page': (context) => const ProfilePage(),
       },
     );
   }
