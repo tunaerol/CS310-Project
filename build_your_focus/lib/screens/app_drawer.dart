@@ -92,9 +92,9 @@ class _AppDrawerState extends State<AppDrawer> {
                   ),
                   const SizedBox(height: 16),
                   _DrawerItem(
-                    icon: Icons.music_note_outlined,
-                    label: "Music",
-                    onTap: () => Navigator.pop(context),
+                    icon: Icons.construction,
+                    label: "Construction",
+                    onTap: () =>  Navigator.pushNamed(context, '/construction_page'),
                   ),
                   const SizedBox(height: 16),
                   _DrawerItem(

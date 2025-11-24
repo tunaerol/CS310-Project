@@ -1,3 +1,4 @@
+import 'package:build_your_focus/screens/construction_progress.dart';
 import 'package:build_your_focus/screens/home_page.dart';
 import 'package:build_your_focus/screens/to_do_page.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +33,7 @@ class _FocusAppState extends State<FocusApp> {
         '/building_page': (context) => const BuildingCollectionPage(),
         '/profile_page': (context) => const ProfilePage(),
         '/to_do_page': (context) => const toDoPage(),
+        '/construction_page': (context) => const ConstructionProgressScreen(),
       },
     );
   }
