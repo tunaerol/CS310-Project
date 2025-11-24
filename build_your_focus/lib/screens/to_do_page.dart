@@ -1,20 +1,7 @@
 import 'package:flutter/material.dart';
+import 'app_drawer.dart';
 
-void main() {
-  runApp(MyApp());
-}
 
-class MyApp extends StatelessWidget{
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: const toDoPage(),
-    );
-  }
-}
 
 class toDoPage extends StatefulWidget {
   const toDoPage({super.key});
@@ -144,6 +131,7 @@ Widget _buildProgressBar(double progress, int completed, int total) {
     double progress = totalTasks == 0 ? 0.0 : completedCount / totalTasks;
     
     return Scaffold(
+      drawer: const AppDrawer(),
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -157,9 +145,13 @@ Widget _buildProgressBar(double progress, int completed, int total) {
             ],
           ),
         ),
-        leading: IconButton(
-          onPressed: () {},
-          icon: const Icon(Icons.menu_rounded, color: Colors.black), // Changed to a rounded menu icon
+        leading: Builder(
+          builder: (context) => IconButton(
+            onPressed: () {
+              Scaffold.of(context).openDrawer(); // Opens the drawer
+            },
+            icon: const Icon(Icons.menu_rounded, color: Colors.black),
+          ),
         ),
         actions: [
           IconButton(

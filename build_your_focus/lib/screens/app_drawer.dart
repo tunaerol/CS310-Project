@@ -76,15 +76,19 @@ class _AppDrawerState extends State<AppDrawer> {
                   const SizedBox(height: 12),
                   const SizedBox(height: 16),
                   _DrawerItem(
-                    icon: Icons.check_box_outlined,
-                    label: "To-Do",
-                    onTap: () => Navigator.pop(context),
+                    icon: Icons.home,
+                    label: "Home",
+                    onTap: (){
+                      Navigator.pushNamed(context, '/home_page');
+                    },
                   ),
                   const SizedBox(height: 16),
                   _DrawerItem(
-                    icon: Icons.shopping_bag_outlined,
-                    label: "Shop",
-                    onTap: () => Navigator.pop(context),
+                    icon: Icons.check_box_outlined,
+                    label: "To-Do",
+                    onTap: (){
+                      Navigator.pushNamed(context, '/to_do_page');
+                    },
                   ),
                   const SizedBox(height: 16),
                   _DrawerItem(

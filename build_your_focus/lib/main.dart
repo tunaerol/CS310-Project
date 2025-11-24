@@ -1,4 +1,5 @@
 import 'package:build_your_focus/screens/home_page.dart';
+import 'package:build_your_focus/screens/to_do_page.dart';
 import 'package:flutter/material.dart';
 import 'entrance/opening_page.dart';
 import 'entrance/login_page.dart';
@@ -30,6 +31,7 @@ class _FocusAppState extends State<FocusApp> {
         '/home_page' : (context) => const HomePage(),
         '/building_page': (context) => const BuildingCollectionPage(),
         '/profile_page': (context) => const ProfilePage(),
+        '/to_do_page': (context) => const toDoPage(),
       },
     );
   }
