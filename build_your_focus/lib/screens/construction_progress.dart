@@ -37,7 +37,7 @@ class _ConstructionProgressScreenState\
             ),\
             const SizedBox(height: 4),\
             const Text(\
-              'Nov 3 - Nov 9',\
+              'Nov 24 - Nov 30',\
               style: TextStyle(\
                 fontSize: 16,\
                 color: Colors.grey,\
