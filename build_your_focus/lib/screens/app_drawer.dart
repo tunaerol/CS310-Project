@@ -78,7 +78,7 @@ class _AppDrawerState extends State<AppDrawer> {
                   _DrawerItem(
                     icon: Icons.home,
                     label: "Home",
-                    onTap: (){
+                    onTap: () {
                       Navigator.pushNamed(context, '/home_page');
                     },
                   ),
@@ -86,7 +86,7 @@ class _AppDrawerState extends State<AppDrawer> {
                   _DrawerItem(
                     icon: Icons.check_box_outlined,
                     label: "To-Do",
-                    onTap: (){
+                    onTap: () {
                       Navigator.pushNamed(context, '/to_do_page');
                     },
                   ),
@@ -94,7 +94,7 @@ class _AppDrawerState extends State<AppDrawer> {
                   _DrawerItem(
                     icon: Icons.construction,
                     label: "Construction",
-                    onTap: () =>  Navigator.pushNamed(context, '/construction_page'),
+                    onTap: () => Navigator.pushNamed(context, '/construction_page'),
                   ),
                   const SizedBox(height: 16),
                   _DrawerItem(
@@ -111,11 +111,24 @@ class _AppDrawerState extends State<AppDrawer> {
                       Navigator.pushNamed(context, '/building_page');
                     },
                   ),
+                  const SizedBox(height: 16),
 
-                  // Big space before settings pill so list fills height
-                  const SizedBox(height: 28),
+                  // 🔹 Help & Support button (fixed spacing)
+                  _DrawerItem(
+                    icon: Icons.help_outline,
+                    label: "Help & Support",
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => HelpPage()),
+                      );
+                    },
+                  ),
 
-                  // Highlighted settings pill
+                  const SizedBox(height: 16),
+
+                  // Highlighted Settings pill
                   const _SettingsPill(),
                 ],
               ),
@@ -123,8 +136,7 @@ class _AppDrawerState extends State<AppDrawer> {
 
             // ----- BOTTOM BAR -----
             Container(
-              padding:
-              const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: const BorderRadius.only(
@@ -163,8 +175,8 @@ class _AppDrawerState extends State<AppDrawer> {
                   const Spacer(),
                   TextButton.icon(
                     onPressed: () {
-                      Navigator.pop(context); // drawer'ı kapat
-                      Navigator.pushNamed(context, '/profile_page'); // profile sayfasına git
+                      Navigator.pop(context);
+                      Navigator.pushNamed(context, '/profile_page');
                     },
                     icon: const Icon(Icons.person_outline),
                     label: const Text("Profile"),
@@ -204,7 +216,7 @@ class _DrawerItem extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 14), // MORE SPACING
+        padding: const EdgeInsets.symmetric(vertical: 14),
         child: Row(
           children: [
             Icon(icon, size: 22, color: Colors.black87),
@@ -242,8 +254,7 @@ class _SettingsPill extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         onTap: () => Navigator.pop(context),
         child: Padding(
-          padding:
-          const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
           child: Row(
             children: const [
               Icon(Icons.settings, color: Colors.black),
