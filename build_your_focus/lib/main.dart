@@ -7,6 +7,8 @@ import 'entrance/login_page.dart';
 import 'entrance/sign_up_page.dart';
 import 'package:build_your_focus/screens/building_collection_page.dart';
 import 'package:build_your_focus/screens/profile_page.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 
 void main(){
   runApp(const FocusApp());
@@ -24,6 +26,13 @@ class _FocusAppState extends State<FocusApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        textTheme: GoogleFonts.montserratTextTheme(
+          Theme.of(context).textTheme,
+        ),
+        primarySwatch: Colors.blue,
+        scaffoldBackgroundColor: const Color(0xFFF5F6FA),
+      ),
       initialRoute: '/opening_page',
       routes: {
         '/opening_page' :(context) => const FirstOpening(),

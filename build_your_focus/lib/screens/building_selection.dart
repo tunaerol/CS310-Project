@@ -1,18 +1,21 @@
-import 'package:build_your_focus/screens/focus_session_screen.dart';
+// screens/building_selection_screen.dart
+
+import 'package:build_your_focus/screens/building_collection_page.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../user_data/user_data_service.dart';
-import 'app_drawer.dart';
 import 'package:build_your_focus/building_model/building_model.dart';
+import 'package:build_your_focus/user_data/user_data_service.dart';
+import 'focus_session_screen.dart';
+import 'app_drawer.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class BuildingSelectionScreen extends StatefulWidget {
+  const BuildingSelectionScreen({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<BuildingSelectionScreen> createState() => _BuildingSelectionScreenState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _BuildingSelectionScreenState extends State<BuildingSelectionScreen> {
   final UserDataService _userDataService = UserDataService();
   final List<Building> _buildings = BuildingData.getAllBuildings();
 
@@ -27,8 +30,8 @@ class _HomePageState extends State<HomePage> {
         : null;
 
     return Scaffold(
+      drawer: AppDrawer(),
       backgroundColor: Colors.white,
-      drawer: AppDrawer(), // Added drawer
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -44,6 +47,8 @@ class _HomePageState extends State<HomePage> {
                       builder: (context) => IconButton(
                         icon: Icon(Icons.menu, size: 28, color: Colors.black),
                         onPressed: () => Scaffold.of(context).openDrawer(),
+                        padding: EdgeInsets.zero,
+                        constraints: BoxConstraints(),
                       ),
                     ),
                     CircleAvatar(
@@ -129,7 +134,14 @@ class _HomePageState extends State<HomePage> {
                   width: double.infinity,
                   height: 55,
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => BuildingCollectionPage(),
+                        ),
+                      );
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFFF5F5F5),
                       shape: RoundedRectangleBorder(
@@ -140,7 +152,10 @@ class _HomePageState extends State<HomePage> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.location_city, size: 24, color: Colors.black),
+                        Text(
+                          "🏙️",
+                          style: TextStyle(fontSize: 24),
+                        ),
                         SizedBox(width: 12),
                         Text(
                           "View My City",
@@ -188,15 +203,15 @@ class _HomePageState extends State<HomePage> {
 
           SizedBox(height: 16),
 
-          // Building visualization - shows current stage
+          // Building visualization placeholder
           Container(
-            height: 120,
+            height: 150,
             child: Center(
-              child: building.stages[currentStage].getImage(height: 100),
+              child: building.stages[currentStage].getImage(width: 180,height: 180),
             ),
           ),
 
-          SizedBox(height: 16),
+          SizedBox(height: 10),
 
           Text(
             "Stage ${currentStage + 1} of ${building.stages.length}",
@@ -307,9 +322,9 @@ class _HomePageState extends State<HomePage> {
                   Icon(Icons.check_circle, color: Colors.green, size: 24),
                 Image.asset(
                   building.completedImagePath,
-                  height: 100,
-                  width: 100,
-                  fit: BoxFit.contain,
+                  height: 120,
+                  width: 150,
+                  fit: BoxFit.cover,
                 ),
 
                 Text(
@@ -323,16 +338,6 @@ class _HomePageState extends State<HomePage> {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-
-                Text(
-                  "${(building.requiredMinutes / 60).toStringAsFixed(0)}h required",
-                  style: GoogleFonts.montserrat(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.grey[600],
-                  ),
-                ),
-
                 SizedBox(height: 12),
 
                 if (isCompleted)
@@ -355,7 +360,7 @@ class _HomePageState extends State<HomePage> {
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.orange,
+                      color: Colors.black,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
