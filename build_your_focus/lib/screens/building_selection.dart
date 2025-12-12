@@ -29,6 +29,18 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen> {
         ? _userDataService.getUserBuilding(currentBuildingId)
         : null;
 
+    List<Building> availableBuildings = _buildings.where((building) {
+      // Don't show the building if it's the current active project (and not completed)
+      if (currentBuildingId != null && building.id == currentBuildingId) {
+        UserBuilding ub = _userDataService.getUserBuilding(building.id);
+        if (!ub.isCompleted) {
+          return false; // Hide from grid - it's shown in "Current Project" section
+        }
+      }
+      return true;
+    }).toList();
+
+
     return Scaffold(
       drawer: AppDrawer(),
       backgroundColor: Colors.white,
@@ -51,10 +63,16 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen> {
                         constraints: BoxConstraints(),
                       ),
                     ),
-                    CircleAvatar(
-                      radius: 20,
-                      backgroundColor: Color(0xFFF5F5F5),
-                      child: Icon(Icons.person, color: Colors.black),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(context, '/profile_page');
+
+                      },
+                      child: CircleAvatar(
+                        radius: 20,
+                        backgroundColor: Color(0xFFF5F5F5),
+                        child: Icon(Icons.person, color: Colors.black),
+                      ),
                     ),
                   ],
                 ),
@@ -101,7 +119,7 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen> {
 
                 // Available Buildings
                 Text(
-                  currentBuilding != null ? "Start New Project" : "Available Projects",
+                  currentBuilding != null ? "Choose New Project" : "Available Projects",
                   style: GoogleFonts.montserrat(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
@@ -112,6 +130,7 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen> {
                 SizedBox(height: 16),
 
                 // Building Grid
+                // Building Grid
                 GridView.builder(
                   shrinkWrap: true,
                   physics: NeverScrollableScrollPhysics(),
@@ -121,9 +140,9 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen> {
                     mainAxisSpacing: 16,
                     childAspectRatio: 0.75,
                   ),
-                  itemCount: _buildings.length,
+                  itemCount: availableBuildings.length,
                   itemBuilder: (context, index) {
-                    return _buildBuildingCard(_buildings[index]);
+                    return _buildBuildingCard(availableBuildings[index]);
                   },
                 ),
 
@@ -188,7 +207,7 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen> {
       decoration: BoxDecoration(
         color: Color(0xFFF5F5F5),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.black, width: 2),
+        border: Border.all(color: Color.fromARGB(250, 194, 194, 194), width: 2),
       ),
       child: Column(
         children: [
@@ -240,7 +259,8 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen> {
               value: progress,
               minHeight: 12,
               backgroundColor: Colors.white,
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+              valueColor: AlwaysStoppedAnimation<Color>(Color.fromARGB(
+                  250, 147, 246, 246)),
             ),
           ),
 
@@ -257,35 +277,37 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen> {
 
           SizedBox(height: 16),
 
-          // Continue button
           SizedBox(
             width: double.infinity,
             height: 50,
-            child: ElevatedButton(
-              onPressed: () {
+            child: GestureDetector(
+              onTap: () {
                 _startFocusSession(building);
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                elevation: 0,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.play_arrow, color: Colors.white, size: 24),
-                  SizedBox(width: 8),
-                  Text(
-                    "Continue Building",
-                    style: GoogleFonts.montserrat(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
+              child: Container(
+                decoration:BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFcdffd8), Color(0xFF94b9ff)],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
                   ),
-                ],
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.play_arrow, color: Colors.black, size: 24),
+                    SizedBox(width: 8),
+                    Text(
+                      "Continue Building",
+                      style: GoogleFonts.montserrat(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -360,15 +382,19 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen> {
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.black,
-                      borderRadius: BorderRadius.circular(12),
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFcdffd8), Color(0xFF94b9ff)],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      ),
+                      borderRadius: BorderRadius.circular(18),
                     ),
                     child: Text(
                       "In Progress",
                       style: GoogleFonts.montserrat(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                        color: Colors.black,
                       ),
                     ),
                   )
@@ -376,15 +402,19 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen> {
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.black,
-                      borderRadius: BorderRadius.circular(12),
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFcdffd8), Color(0xFF94b9ff)],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      ),
+                      borderRadius: BorderRadius.circular(18),
                     ),
                     child: Text(
                       "Start",
                       style: GoogleFonts.montserrat(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                        color: Colors.black,
                       ),
                     ),
                   ),

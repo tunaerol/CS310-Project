@@ -85,6 +85,77 @@ class BuildingData {
   static List<Building> getAllBuildings() {
     return [
       Building(
+          id: 'pyramid',
+          name: 'Pyramid',
+          completedImagePath: "lib/assets/images/buildings/pyramid/pyramid10.png",
+          requiredMinutes: 180,
+          description: "A building that comes from ancient times",
+          stages: [
+            BuildingStage(
+                name: 'Stage 1',
+                description: 'Gathering stone blocks and materials',
+                imagePath: "lib/assets/images/buildings/pyramid/pyramid1.png",
+            ),
+            BuildingStage(
+              name: 'Stage 2',
+              description: 'Laying the foundation outline',
+              imagePath: "lib/assets/images/buildings/pyramid/pyramid2.png",
+            ),
+            BuildingStage(
+              name: 'Stage 3',
+              description: 'Stacking the first layers',
+              imagePath: "lib/assets/images/buildings/pyramid/pyramid3.png",
+            ),
+
+            BuildingStage(
+              name: 'Stage 4',
+              description: 'Erecting wooden scaffolding',
+              imagePath: "lib/assets/images/buildings/pyramid/pyramid4.png",
+            ),
+            BuildingStage(
+              name: 'Stage 5',
+              description: 'Reaching mid-height with crane',
+              imagePath: "lib/assets/images/buildings/pyramid/pyramid5.png",
+            ),
+
+            BuildingStage(
+              name: 'Stage 6',
+              description: 'Building the upper levels',
+              imagePath: "lib/assets/images/buildings/pyramid/pyramid6.png",
+            ),
+
+            BuildingStage(
+              name: 'Stage 7',
+              description: 'Approaching the summit',
+              imagePath: "lib/assets/images/buildings/pyramid/pyramid7.png",
+            ),
+
+
+
+            BuildingStage(
+              name: 'Stage 8',
+              description: 'Placing the final stones',
+              imagePath: "lib/assets/images/buildings/pyramid/pyramid8.png",
+            ),
+
+
+
+            BuildingStage(
+              name: 'Stage 9',
+              description: 'Lifting the capstone',
+              imagePath: "lib/assets/images/buildings/pyramid/pyramid9.png",
+            ),
+
+            BuildingStage(
+              name: 'Stage 10',
+              description: 'Pyramid complete',
+              imagePath: "lib/assets/images/buildings/pyramid/pyramid10.png",
+            ),
+
+
+          ]
+      ),
+      Building(
         id: 'anitkabir',
         name: 'Anıtkabir',
         completedImagePath: "lib/assets/images/buildings/anitkabir/anitkabir8.png",

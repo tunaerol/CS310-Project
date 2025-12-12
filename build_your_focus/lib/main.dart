@@ -1,5 +1,5 @@
+import 'package:build_your_focus/screens/building_selection.dart';
 import 'package:build_your_focus/screens/construction_progress.dart';
-import 'package:build_your_focus/screens/home_page.dart';
 import 'package:build_your_focus/screens/to_do_page.dart';
 import 'package:flutter/material.dart';
 import 'entrance/opening_page.dart';
@@ -38,7 +38,7 @@ class _FocusAppState extends State<FocusApp> {
         '/opening_page' :(context) => const FirstOpening(),
         '/login_page' : (context) => const LoginPage(),
         '/sign_up_page' : (context) => const SignUpPage(),
-        '/home_page' : (context) => const HomePage(),
+        '/home_page' : (context) => const BuildingSelectionScreen(),
         '/building_page': (context) => const BuildingCollectionPage(),
         '/profile_page': (context) => const ProfilePage(),
         '/to_do_page': (context) => const toDoPage(),

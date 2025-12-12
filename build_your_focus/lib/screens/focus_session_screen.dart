@@ -1,5 +1,6 @@
 
 import 'dart:async';
+import 'package:build_your_focus/screens/building_selection.dart';
 import 'package:build_your_focus/screens/completion_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -19,7 +20,8 @@ class _FocusSessionScreenState extends State<FocusSessionScreen> {
 
   // Timer variables
   Timer? _timer;
-  int _remainingSeconds = 25*60; // 25 minutes default
+  int _selectedDuration = 15;
+  int _remainingSeconds = 15*60; //time
   bool _isRunning = false;
   int _sessionMinutes = 0;
 
@@ -56,28 +58,37 @@ class _FocusSessionScreenState extends State<FocusSessionScreen> {
   void _stopSession() {
     _timer?.cancel();
 
-    // Add progress even if stopped early
-    int minutesCompleted = 25 - (_remainingSeconds / 60).ceil();
+    int totalSeconds = _selectedDuration * 60;
+    int secondsCompleted = totalSeconds - _remainingSeconds;
+    int minutesCompleted = (secondsCompleted / 60).ceil();
+
     if (minutesCompleted > 0) {
       _userDataService.addProgress(widget.building.id, minutesCompleted);
     }
 
-    Navigator.pop(context);
+    _goToHome();
+  }
+
+  void _goToHome() {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => BuildingSelectionScreen()),
+          (route) => false,
+    );
   }
 
   void _completeSession() {
     _timer?.cancel();
 
-    // Add 25 minutes progress
-    _userDataService.addProgress(widget.building.id, 25);
 
-    // Navigate to completion screen
+
+    _userDataService.addProgress(widget.building.id, _selectedDuration);
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
         builder: (context) => CompletionScreen(
           building: widget.building,
-          sessionMinutes: 25,
+          sessionMinutes: _selectedDuration,
         ),
       ),
     );
@@ -88,6 +99,85 @@ class _FocusSessionScreenState extends State<FocusSessionScreen> {
     int secs = seconds % 60;    return '${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
   }
 
+  Widget _buildDurationSelector() {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Color(0xFFF5F5F5),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Column(
+        children: [
+          Text(
+            "Session Duration",
+            style: GoogleFonts.montserrat(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[700],
+            ),
+          ),
+          SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildDurationOption(15),
+              SizedBox(width: 2,),
+              _buildDurationOption(30),
+              SizedBox(width: 2,),
+              _buildDurationOption(45),
+              SizedBox(width: 2,),
+              _buildDurationOption(60),
+              SizedBox(width: 2,),
+              _buildDurationOption(120),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDurationOption(int minutes) {
+    bool isSelected = _selectedDuration == minutes;
+    bool canChange = !_isRunning; // Can only change when timer is not running
+
+    return Opacity(
+      opacity: canChange ? 1.0 : 0.5,
+      child: GestureDetector(
+        onTap: canChange ? () {
+          setState(() {
+            _selectedDuration = minutes;
+            _remainingSeconds = minutes * 60;
+          });
+        } : null,
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+          decoration: BoxDecoration(
+            gradient: isSelected
+                ? const LinearGradient(
+              colors: [Color(0xFFcdffd8), Color(0xFF94b9ff)],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            )
+                : null,
+            color: isSelected ? null : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected ? Color.fromARGB(150, 156, 188, 245) : Colors.grey[300]!,
+              width: 1,
+            ),
+          ),
+          child: Text(
+            "$minutes min",
+            style: GoogleFonts.montserrat(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: isSelected ? Colors.black : Colors.black,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     UserBuilding userBuilding = _userDataService.getUserBuilding(widget.building.id);
@@ -98,16 +188,6 @@ class _FocusSessionScreenState extends State<FocusSessionScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            if (_isRunning) {
-              _showExitDialog();
-            } else {
-              Navigator.pop(context);
-            }
-          },
-        ),
         title: Text(
           "Focus Session",
           style: GoogleFonts.montserrat(
@@ -117,10 +197,19 @@ class _FocusSessionScreenState extends State<FocusSessionScreen> {
           ),
         ),
         centerTitle: true,
+
+        automaticallyImplyLeading: false,
+        leading: !_isRunning
+            ? IconButton(
+          icon: Icon(Icons.arrow_back_ios, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        )
+            : null,
+
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
             children: [
               // Building name
@@ -134,7 +223,9 @@ class _FocusSessionScreenState extends State<FocusSessionScreen> {
                 textAlign: TextAlign.center,
               ),
 
-              SizedBox(height: 30),
+              SizedBox(height: 10),
+              _buildDurationSelector(), // -------------
+              SizedBox(height: 20),
 
               // Building visualization
               Expanded(
@@ -154,12 +245,11 @@ class _FocusSessionScreenState extends State<FocusSessionScreen> {
                               );
 
                               return widget.building.stages[currentStage].getImage(
-                                height: 180,
-                                width: 180,
+                                height: 150,
+                                width: 150,
                               );
                             }
                         ),
-                        SizedBox(height: 16),
                         Text(
                           "Stage ${currentStage + 1} of ${widget.building.stages.length}",
                           style: GoogleFonts.montserrat(
@@ -202,60 +292,70 @@ class _FocusSessionScreenState extends State<FocusSessionScreen> {
                   Expanded(
                     child: SizedBox(
                       height: 55,
-                      child: ElevatedButton(
-                        onPressed: _isRunning ? _pauseTimer : _startTimer,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: _isRunning ? Color(0xFFF5F5F5) : Colors.black,
-                          shape: RoundedRectangleBorder(
+                      child: GestureDetector(
+                        onTap: _isRunning ? _pauseTimer : _startTimer,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: _isRunning
+                                ? null
+                                : const LinearGradient(
+                              colors: [Color(0xFFcdffd8), Color(0xFF94b9ff)],
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                            ),
+                            color: _isRunning ? Color(0xFFF5F5F5) : null,
                             borderRadius: BorderRadius.circular(18),
-                            side: _isRunning ? BorderSide(color: Colors.black, width: 2) : BorderSide.none,
+                            border: Border.all(
+                              color: _isRunning ? Colors.black : Colors.transparent,
+                              width: _isRunning ? 2 : 0,
+                            ),
                           ),
-                          elevation: 0,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              _isRunning ? Icons.pause : Icons.play_arrow,
-                              color: _isRunning ? Colors.black : Colors.white,
-                              size: 28,
-                            ),
-                            SizedBox(width: 8),
-                            Text(
-                              _isRunning ? "Pause" : "Start",
-                              style: GoogleFonts.montserrat(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                                color: _isRunning ? Colors.black : Colors.white,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                _isRunning ? Icons.pause : Icons.play_arrow,
+                                color: _isRunning ? Colors.black : Colors.black,
+                                size: 28,
                               ),
-                            ),
-                          ],
+                              SizedBox(width: 8),
+                              Text(
+                                _isRunning ? "Pause" : "Start",
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: _isRunning ? Colors.black : Colors.black,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
                   SizedBox(width: 16),
-                  SizedBox(
-                    height: 55,
-                    width: 55,
-                    child: ElevatedButton(
-                      onPressed: _stopSession,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFFF5F5F5),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18),
-                          side: BorderSide(color: Colors.red, width: 2),
+                  if (_isRunning || _remainingSeconds != _selectedDuration * 60)
+                    SizedBox(
+                      height: 55,
+                      width: 55,
+                      child: ElevatedButton(
+                        onPressed: _showExitDialog,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFFF5F5F5),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
+                            side: BorderSide(color: Colors.red, width: 2),
+                          ),
+                          elevation: 0,
+                          padding: EdgeInsets.zero,
                         ),
-                        elevation: 0,
-                        padding: EdgeInsets.zero,
-                      ),
-                      child: Icon(
-                        Icons.stop,
-                        color: Colors.red,
-                        size: 28,
+                        child: Icon(
+                          Icons.stop,
+                          color: Colors.red,
+                          size: 28,
+                        ),
                       ),
                     ),
-                  ),
                 ],
               ),
 
@@ -307,7 +407,7 @@ class _FocusSessionScreenState extends State<FocusSessionScreen> {
                             ),
                             SizedBox(height: 4),
                             Text(
-                              "+25 min",
+                              "+$_selectedDuration min",
                               style: GoogleFonts.montserrat(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,

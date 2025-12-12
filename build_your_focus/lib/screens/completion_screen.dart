@@ -1,6 +1,7 @@
 // screens/completion_screen.dart
 
 import 'package:build_your_focus/screens/building_collection_page.dart';
+import 'package:build_your_focus/screens/focus_session_screen.dart';
 import 'package:build_your_focus/screens/building_selection.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -170,7 +171,8 @@ class CompletionScreen extends StatelessWidget {
                           value: progress,
                           minHeight: 12,
                           backgroundColor: Colors.white,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                          valueColor: AlwaysStoppedAnimation<Color>(Color.fromARGB(
+                              250, 147, 246, 246)),
                         ),
                       ),
                       SizedBox(height: 12),
@@ -292,60 +294,72 @@ class CompletionScreen extends StatelessWidget {
                   ),
                 ),
               ] else ...[
+                // Change this section (around line 230):
                 SizedBox(
                   width: double.infinity,
                   height: 55,
-                  child: ElevatedButton(
-                    onPressed: () {
+                  child: GestureDetector(
+                    onTap: () {
+
                       Navigator.pushAndRemoveUntil(
                         context,
-                        MaterialPageRoute(builder: (context) => BuildingSelectionScreen()),
-                            (route) => false,
+                        MaterialPageRoute(
+                          builder: (context) => FocusSessionScreen(building: building),
+                        ),
+                            (route) => route.settings.name == '/home_page',
                       );
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFcdffd8), Color(0xFF94b9ff)],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        ),
                         borderRadius: BorderRadius.circular(18),
                       ),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      "Continue Building",
-                      style: GoogleFonts.montserrat(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                      child: Center(
+                        child: Text(
+                          "Continue Building",
+                          style: GoogleFonts.montserrat(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.black,
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
                 SizedBox(height: 16),
+
                 SizedBox(
                   width: double.infinity,
                   height: 55,
-                  child: ElevatedButton(
-                    onPressed: () {
+                  child: GestureDetector(
+                    onTap: () {
                       Navigator.pushAndRemoveUntil(
                         context,
-                        MaterialPageRoute(builder: (context) => BuildingSelectionScreen()),
-                            (route) => false,
+                        MaterialPageRoute(
+                          builder: (context) => BuildingSelectionScreen(),
+                        ),
+                            (route) => route.settings.name == '/home_page',
                       );
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFFF5F5F5),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18),
-                        side: BorderSide(color: Colors.black, width: 2),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      "Choose Another Project",
-                      style: GoogleFonts.montserrat(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
+                    child: Container(
+                      decoration: BoxDecoration(
                         color: Colors.black,
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: Center(
+                        child: Text(
+                          "Choose Another Project",
+                          style: GoogleFonts.montserrat(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
                     ),
                   ),

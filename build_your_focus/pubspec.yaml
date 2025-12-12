@@ -62,6 +62,7 @@ flutter:
   assets:
     - lib/assets/images/openings/
     - lib/assets/images/buildings/anitkabir/
+    - lib/assets/images/buildings/pyramid/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
