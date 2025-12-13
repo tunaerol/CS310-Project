@@ -1,22 +1,19 @@
 import 'package:flutter/material.dart';
 import 'help_page.dart';
 
-
 // Local colors for the drawer
 const Color kBackground = Color(0xFFF5F6FA);
 const Color kAccentBlue = Color(0xFF3B82F6);
 const Color kAccentGreen = Color(0xFF10B981);
 
-class AppDrawer extends StatefulWidget {
+class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
 
   @override
-  State<AppDrawer> createState() => _AppDrawerState();
-}
-
-class _AppDrawerState extends State<AppDrawer> {
-  @override
   Widget build(BuildContext context) {
+    // Automatically gets the name of the current page
+    final String? currentRoute = ModalRoute.of(context)?.settings.name;
+
     return Drawer(
       backgroundColor: Colors.white,
       child: SafeArea(
@@ -74,62 +71,103 @@ class _AppDrawerState extends State<AppDrawer> {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 children: [
                   const SizedBox(height: 12),
-                  const SizedBox(height: 16),
+
                   _DrawerItem(
                     icon: Icons.home,
                     label: "Home",
+                    // Highlight Home if route is explicitly home OR null (app start)
+                    isActive: currentRoute == '/home_page' || currentRoute == null,
                     onTap: () {
-                      Navigator.pushNamed(context, '/home_page');
+                      if (currentRoute != '/home_page') {
+                        Navigator.pushNamed(context, '/home_page');
+                      } else {
+                        Navigator.pop(context);
+                      }
                     },
                   ),
                   const SizedBox(height: 16),
+
                   _DrawerItem(
                     icon: Icons.check_box_outlined,
                     label: "To-Do",
+                    isActive: currentRoute == '/to_do_page',
                     onTap: () {
-                      Navigator.pushNamed(context, '/to_do_page');
+                      if (currentRoute != '/to_do_page') {
+                        Navigator.pushNamed(context, '/to_do_page');
+                      } else {
+                        Navigator.pop(context);
+                      }
                     },
                   ),
                   const SizedBox(height: 16),
+
                   _DrawerItem(
                     icon: Icons.construction,
                     label: "Construction",
-                    onTap: () => Navigator.pushNamed(context, '/construction_page'),
+                    isActive: currentRoute == '/construction_page',
+                    onTap: () {
+                      if (currentRoute != '/construction_page') {
+                        Navigator.pushNamed(context, '/construction_page');
+                      } else {
+                        Navigator.pop(context);
+                      }
+                    },
                   ),
                   const SizedBox(height: 16),
+
                   _DrawerItem(
                     icon: Icons.bar_chart_outlined,
                     label: "Weekly Stats",
+                    isActive: currentRoute == '/weekly_stats',
                     onTap: () => Navigator.pop(context),
                   ),
                   const SizedBox(height: 16),
+
                   _DrawerItem(
                     icon: Icons.location_city_outlined,
                     label: "My City",
+                    isActive: currentRoute == '/building_page',
                     onTap: () {
-                      Navigator.pop(context);
-                      Navigator.pushNamed(context, '/building_page');
+                      if (currentRoute != '/building_page') {
+                        Navigator.pop(context);
+                        Navigator.pushNamed(context, '/building_page');
+                      } else {
+                        Navigator.pop(context);
+                      }
                     },
                   ),
                   const SizedBox(height: 16),
 
-                  // 🔹 Help & Support button (fixed spacing)
                   _DrawerItem(
                     icon: Icons.help_outline,
                     label: "Help & Support",
+                    // This now works because we pass the name when pushing!
+                    isActive: currentRoute == '/help_page',
                     onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => HelpPage()),
-                      );
+                      if (currentRoute != '/help_page') {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => HelpPage(),
+                            // THIS LINE FIXES EVERYTHING:
+                            settings: const RouteSettings(name: '/help_page'),
+                          ),
+                        );
+                      } else {
+                        Navigator.pop(context);
+                      }
                     },
                   ),
 
                   const SizedBox(height: 16),
 
-                  // Highlighted Settings pill
-                  const _SettingsPill(),
+                  _DrawerItem(
+                    icon: Icons.settings,
+                    label: "Settings",
+                    isActive: currentRoute == '/settings_page',
+                    onTap: () => Navigator.pop(context),
+                  ),
                 ],
               ),
             ),
@@ -203,67 +241,43 @@ class _DrawerItem extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback? onTap;
+  final bool isActive;
 
   const _DrawerItem({
     required this.icon,
     required this.label,
     this.onTap,
+    this.isActive = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        child: Row(
-          children: [
-            Icon(icon, size: 22, color: Colors.black87),
-            const SizedBox(width: 12),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SettingsPill extends StatelessWidget {
-  const _SettingsPill();
-
-  @override
-  Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: isActive
+            ? const LinearGradient(
           colors: [Color(0xFFcdffd8), Color(0xFF94b9ff)],
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
-        ),
+        )
+            : null,
         borderRadius: BorderRadius.circular(18),
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(24),
-        onTap: () => Navigator.pop(context),
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
           child: Row(
-            children: const [
-              Icon(Icons.settings, color: Colors.black),
-              SizedBox(width: 12),
+            children: [
+              Icon(icon, size: 22, color: Colors.black87),
+              const SizedBox(width: 12),
               Text(
-                "Settings",
-                style: TextStyle(
-                  color: Colors.black,
+                label,
+                style: const TextStyle(
+                  fontSize: 15,
                   fontWeight: FontWeight.w600,
+                  color: Colors.black87,
                 ),
               ),
             ],
