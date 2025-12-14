@@ -1,3 +1,4 @@
+import 'package:build_your_focus/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'help_page.dart';
 
@@ -13,6 +14,7 @@ class AppDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     // Automatically gets the name of the current page
     final String? currentRoute = ModalRoute.of(context)?.settings.name;
+    final AuthService _authService = AuthService();
 
     return Drawer(
       backgroundColor: Colors.white,
@@ -196,17 +198,25 @@ class AppDrawer extends StatelessWidget {
                       Navigator.pop(context);
                     },
                     child: Row(
-                      children: const [
-                        Icon(Icons.logout,
-                            size: 20, color: Colors.redAccent),
-                        SizedBox(width: 6),
-                        Text(
-                          "Log Out",
-                          style: TextStyle(
-                            color: Colors.redAccent,
-                            fontWeight: FontWeight.w600,
+                      children: [
+                        TextButton.icon(
+                          onPressed: () async {
+                            await _authService.signOut();
+                            if (context.mounted) {
+                              Navigator.pushNamedAndRemoveUntil(
+                                  context, '/login_page', (route) => false);
+                            }
+                          },
+                          icon: const Icon(Icons.logout, size: 20, color: Colors.redAccent),
+                          label: const Text(
+                            "Log Out",
+                            style: TextStyle(
+                              color: Colors.redAccent,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
+                        SizedBox(width: 6),
                       ],
                     ),
                   ),

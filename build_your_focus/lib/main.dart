@@ -2,15 +2,25 @@ import 'package:build_your_focus/screens/building_selection.dart';
 import 'package:build_your_focus/screens/construction_progress.dart';
 import 'package:build_your_focus/screens/to_do_page.dart';
 import 'package:flutter/material.dart';
-import 'entrance/opening_page.dart';
-import 'entrance/login_page.dart';
-import 'entrance/sign_up_page.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'firebase_options.dart';
+import 'screens/auth/opening_page.dart';
+import 'screens/auth/login_page.dart';
+import 'screens/auth/sign_up_page.dart';
 import 'package:build_your_focus/screens/building_collection_page.dart';
 import 'package:build_your_focus/screens/profile_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+void main() async {
 
-void main(){
+  WidgetsFlutterBinding.ensureInitialized();
+
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   runApp(const FocusApp());
 }
 
@@ -33,16 +43,44 @@ class _FocusAppState extends State<FocusApp> {
         primarySwatch: Colors.blue,
         scaffoldBackgroundColor: const Color(0xFFF5F6FA),
       ),
-      initialRoute: '/opening_page',
+      home: const AuthWrapper(),
       routes: {
-        '/opening_page' :(context) => const FirstOpening(),
-        '/login_page' : (context) => const LoginPage(),
-        '/sign_up_page' : (context) => const SignUpPage(),
-        '/home_page' : (context) => const BuildingSelectionScreen(),
+        '/opening_page': (context) => const FirstOpening(),
+        '/login_page': (context) => const LoginPage(),
+        '/sign_up_page': (context) => const SignUpPage(),
+        '/home_page': (context) => const BuildingSelectionScreen(),
         '/building_page': (context) => const BuildingCollectionPage(),
         '/profile_page': (context) => const ProfilePage(),
         '/to_do_page': (context) => const toDoPage(),
         '/construction_page': (context) => const ConstructionProgressScreen(),
+      },
+    );
+  }
+}
+
+
+class AuthWrapper extends StatelessWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        if (snapshot.hasData) {
+          return const BuildingSelectionScreen();
+        } else {
+          return const FirstOpening();
+        }
       },
     );
   }
