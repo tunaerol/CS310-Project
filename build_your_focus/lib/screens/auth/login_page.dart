@@ -17,6 +17,7 @@ class _LoginPageState extends State<LoginPage> {
 
   bool _obsecure = true;
   bool _loading = false;
+  bool _resetLoading = false;
 
   void _toggleObsecure() {
     setState(() => _obsecure = !_obsecure);
@@ -56,11 +57,42 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-
     Navigator.pushNamedAndRemoveUntil(
       context,
       '/home_page',
           (route) => false,
+    );
+  }
+
+  Future<void> _handleForgotPassword() async {
+    final email = _controllerEmail.text.trim();
+
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter your email first.')),
+      );
+      return;
+    }
+
+    FocusScope.of(context).unfocus();
+
+    setState(() => _resetLoading = true);
+
+    final error = await _authService.sendPasswordResetEmail(email: email);
+
+    if (!mounted) return;
+
+    setState(() => _resetLoading = false);
+
+    if (error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error)),
+      );
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Password reset email sent. Check your inbox.')),
     );
   }
 
@@ -82,8 +114,6 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
       backgroundColor: Colors.white,
-
-
       body: SafeArea(
         child: SingleChildScrollView(
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -172,8 +202,15 @@ class _LoginPageState extends State<LoginPage> {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: null,
-                  child: Text(
+                  // ✅ aktif
+                  onPressed: (_loading || _resetLoading) ? null : _handleForgotPassword,
+                  child: _resetLoading
+                      ? const SizedBox(
+                    height: 14,
+                    width: 14,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                      : Text(
                     "Forgot Password?",
                     style: GoogleFonts.montserrat(
                       fontSize: 12,
@@ -285,9 +322,13 @@ class _LoginPageState extends State<LoginPage> {
                           .showSnackBar(SnackBar(content: Text(error)));
                       return;
                     }
-                    Navigator.pushNamedAndRemoveUntil(context, '/home_page', (route) => false,);
-                  },
 
+                    Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      '/home_page',
+                          (route) => false,
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF000000),
                     shape: RoundedRectangleBorder(
@@ -316,7 +357,6 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-
 
               const SizedBox(height: 24),
             ],

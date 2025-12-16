@@ -2,8 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/foundation.dart';
 
-
-
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -24,17 +22,15 @@ class AuthService {
     } on FirebaseAuthException catch (e) {
       return _getErrorMessage(e.code);
     } catch (e, st) {
-      print('AUTH UNKNOWN ERROR: $e');
-      print('STACKTRACE: $st');
+      debugPrint('AUTH UNKNOWN ERROR: $e');
+      debugPrint('STACKTRACE: $st');
       return 'Try again: $e';
     }
   }
 
-
   Future<String?> signInWithGoogle() async {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-
       if (googleUser == null) return 'Cancelled.';
 
       final GoogleSignInAuthentication googleAuth =
@@ -57,8 +53,6 @@ class AuthService {
     }
   }
 
-
-
   Future<String?> login({
     required String email,
     required String password,
@@ -71,8 +65,25 @@ class AuthService {
       return null;
     } on FirebaseAuthException catch (e) {
       return _getErrorMessage(e.code);
-    } catch (_) {
-      return 'Try again';
+    } catch (e, st) {
+      debugPrint('LOGIN UNKNOWN ERROR: $e');
+      debugPrint('$st');
+      return 'Try again: $e';
+    }
+  }
+
+  Future<String?> sendPasswordResetEmail({required String email}) async {
+    try {
+      await _auth.sendPasswordResetEmail(
+        email: email.trim().toLowerCase(),
+      );
+      return null;
+    } on FirebaseAuthException catch (e) {
+      return _getErrorMessage(e.code);
+    } catch (e, st) {
+      debugPrint('RESET PASSWORD UNKNOWN ERROR: $e');
+      debugPrint('$st');
+      return 'Try again: $e';
     }
   }
 
@@ -94,6 +105,10 @@ class AuthService {
         return 'Invalid email address.';
       case 'network-request-failed':
         return 'Please check your internet connection.';
+      case 'too-many-requests':
+        return 'Too many attempts. Please try again later.';
+      case 'operation-not-allowed':
+        return 'This sign-in method is not enabled.';
       default:
         return 'An error occurred: $code';
     }
