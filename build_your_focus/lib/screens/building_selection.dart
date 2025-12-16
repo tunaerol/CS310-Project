@@ -25,7 +25,7 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Keep this as-is for now (minimal change)
+
     String? currentBuildingId = _userDataService.getCurrentBuildingId();
 
     return StreamBuilder<Map<String, UserBuilding>>(
