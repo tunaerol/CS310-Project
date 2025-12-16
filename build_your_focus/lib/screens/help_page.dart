@@ -196,7 +196,7 @@ class _LinkTile extends StatelessWidget {
   final String text;
   final String? trailing;
   final bool isLast;
-  final String answer; // Added this to hold the explanation
+  final String answer;
 
   const _LinkTile(this.text,
       {this.trailing, this.isLast = false, required this.answer});
@@ -204,7 +204,6 @@ class _LinkTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      // This makes the "little page" (ModalBottomSheet) pop up
       onTap: () {
         showModalBottomSheet(
           context: context,
@@ -219,10 +218,9 @@ class _LinkTile extends StatelessWidget {
             ),
             padding: const EdgeInsets.all(24),
             child: Column(
-              mainAxisSize: MainAxisSize.min, // Wrap content height
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Little handle bar
                 Center(
                   child: Container(
                     width: 40,
@@ -235,7 +233,6 @@ class _LinkTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
 
-                // Question Title
                 Text(
                   text,
                   style: const TextStyle(
@@ -245,7 +242,6 @@ class _LinkTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
 
-                // Answer Text
                 Text(
                   answer,
                   style: TextStyle(
@@ -256,21 +252,38 @@ class _LinkTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 30),
 
-                // Close button
-                SizedBox(
+                // --- CHANGED BUTTON ---
+                Container(
                   width: double.infinity,
+                  height: 55,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFcdffd8), Color(0xFF94b9ff)],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   child: ElevatedButton(
                     onPressed: () => Navigator.pop(context),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    child: const Text("Got it"),
+                    child: const Text(
+                      "Got it",
+                      style: TextStyle(
+                        color: Colors.black, // Changed text to black for better contrast
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
                   ),
                 )
+                // ---------------------
               ],
             ),
           ),

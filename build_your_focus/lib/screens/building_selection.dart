@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:build_your_focus/building_model/building_model.dart';
 import 'package:build_your_focus/user_data/user_data_service.dart';
+import 'package:build_your_focus/services/building_progress_firestore_service.dart';
 import 'focus_session_screen.dart';
 import 'app_drawer.dart';
 
@@ -17,184 +18,226 @@ class BuildingSelectionScreen extends StatefulWidget {
 
 class _BuildingSelectionScreenState extends State<BuildingSelectionScreen> {
   final UserDataService _userDataService = UserDataService();
+  final BuildingProgressFirestoreService _progressService =
+  BuildingProgressFirestoreService();
+
   final List<Building> _buildings = BuildingData.getAllBuildings();
 
   @override
   Widget build(BuildContext context) {
+    // Keep this as-is for now (minimal change)
     String? currentBuildingId = _userDataService.getCurrentBuildingId();
-    Building? currentBuilding = currentBuildingId != null
-        ? BuildingData.getBuildingById(currentBuildingId)
-        : null;
-    UserBuilding? currentUserBuilding = currentBuildingId != null
-        ? _userDataService.getUserBuilding(currentBuildingId)
-        : null;
 
-    List<Building> availableBuildings = _buildings.where((building) {
-      // Don't show the building if it's the current active project (and not completed)
-      if (currentBuildingId != null && building.id == currentBuildingId) {
-        UserBuilding ub = _userDataService.getUserBuilding(building.id);
-        if (!ub.isCompleted) {
-          return false; // Hide from grid - it's shown in "Current Project" section
+    return StreamBuilder<Map<String, UserBuilding>>(
+      stream: _progressService.streamUserBuildings(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Scaffold(
+            drawer: AppDrawer(),
+            backgroundColor: Colors.white,
+            body: Center(
+              child: Text(
+                "Error: ${snapshot.error}",
+                style: GoogleFonts.montserrat(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          );
         }
-      }
-      return true;
-    }).toList();
 
+        if (!snapshot.hasData) {
+          return const Scaffold(
+            backgroundColor: Colors.white,
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
 
-    return Scaffold(
-      drawer: AppDrawer(),
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        final progressMap = snapshot.data!;
+
+        // Current building + its progress (from Firestore)
+        Building? currentBuilding = currentBuildingId != null
+            ? BuildingData.getBuildingById(currentBuildingId)
+            : null;
+
+        UserBuilding? currentUserBuilding = currentBuildingId != null
+            ? (progressMap[currentBuildingId] ??
+            UserBuilding(buildingId: currentBuildingId))
+            : null;
+
+        List<Building> availableBuildings = _buildings.where((building) {
+          // Don't show the building if it's the current active project (and not completed)
+          if (currentBuildingId != null && building.id == currentBuildingId) {
+            UserBuilding ub = progressMap[building.id] ?? UserBuilding(buildingId: building.id);
+            if (!ub.isCompleted) {
+              return false; // Hide from grid - it's shown in "Current Project" section
+            }
+          }
+          return true;
+        }).toList();
+
+        return Scaffold(
+          drawer: AppDrawer(),
+          backgroundColor: Colors.white,
+          body: SafeArea(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Builder(
-                      builder: (context) => IconButton(
-                        icon: Icon(Icons.menu, size: 28, color: Colors.black),
-                        onPressed: () => Scaffold.of(context).openDrawer(),
-                        padding: EdgeInsets.zero,
-                        constraints: BoxConstraints(),
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pushNamed(context, '/profile_page');
-
-                      },
-                      child: CircleAvatar(
-                        radius: 20,
-                        backgroundColor: Color(0xFFF5F5F5),
-                        child: Icon(Icons.person, color: Colors.black),
-                      ),
-                    ),
-                  ],
-                ),
-
-                SizedBox(height: 30),
-
-                // Title
-                Text(
-                  "Choose Your Project",
-                  style: GoogleFonts.montserrat(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.black,
-                  ),
-                ),
-
-                SizedBox(height: 8),
-
-                Text(
-                  "Build monuments through focus",
-                  style: GoogleFonts.montserrat(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.grey[600],
-                  ),
-                ),
-
-                SizedBox(height: 30),
-
-                // Current Project (if exists)
-                if (currentBuilding != null && currentUserBuilding != null && !currentUserBuilding.isCompleted) ...[
-                  Text(
-                    "Current Project",
-                    style: GoogleFonts.montserrat(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey[700],
-                    ),
-                  ),
-                  SizedBox(height: 12),
-                  _buildCurrentProjectCard(currentBuilding, currentUserBuilding),
-                  SizedBox(height: 30),
-                ],
-
-                // Available Buildings
-                Text(
-                  currentBuilding != null ? "Choose New Project" : "Available Projects",
-                  style: GoogleFonts.montserrat(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.black,
-                  ),
-                ),
-
-                SizedBox(height: 16),
-
-                // Building Grid
-                // Building Grid
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    childAspectRatio: 0.75,
-                  ),
-                  itemCount: availableBuildings.length,
-                  itemBuilder: (context, index) {
-                    return _buildBuildingCard(availableBuildings[index]);
-                  },
-                ),
-
-                SizedBox(height: 30),
-
-                // My City Button
-                SizedBox(
-                  width: double.infinity,
-                  height: 55,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => BuildingCollectionPage(),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFFF5F5F5),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    // Header
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          "🏙️",
-                          style: TextStyle(fontSize: 24),
+                        Builder(
+                          builder: (context) => IconButton(
+                            icon: Icon(Icons.menu, size: 28, color: Colors.black),
+                            onPressed: () => Scaffold.of(context).openDrawer(),
+                            padding: EdgeInsets.zero,
+                            constraints: BoxConstraints(),
+                          ),
                         ),
-                        SizedBox(width: 12),
-                        Text(
-                          "View My City",
-                          style: GoogleFonts.montserrat(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.black,
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pushNamed(context, '/profile_page');
+                          },
+                          child: CircleAvatar(
+                            radius: 20,
+                            backgroundColor: Color(0xFFF5F5F5),
+                            child: Icon(Icons.person, color: Colors.black),
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ),
 
-                SizedBox(height: 24),
-              ],
+                    SizedBox(height: 30),
+
+                    // Title
+                    Text(
+                      "Choose Your Project",
+                      style: GoogleFonts.montserrat(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.black,
+                      ),
+                    ),
+
+                    SizedBox(height: 8),
+
+                    Text(
+                      "Build monuments through focus",
+                      style: GoogleFonts.montserrat(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+
+                    SizedBox(height: 30),
+
+                    // Current Project (if exists)
+                    if (currentBuilding != null &&
+                        currentUserBuilding != null &&
+                        !currentUserBuilding.isCompleted) ...[
+                      Text(
+                        "Current Project",
+                        style: GoogleFonts.montserrat(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black,
+                        ),
+                      ),
+                      SizedBox(height: 12),
+                      _buildCurrentProjectCard(currentBuilding, currentUserBuilding),
+                      SizedBox(height: 30),
+                    ],
+
+                    // Available Buildings
+                    Text(
+                      currentBuilding != null
+                          ? "Choose New Project"
+                          : "Available Projects",
+                      style: GoogleFonts.montserrat(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black,
+                      ),
+                    ),
+
+                    SizedBox(height: 16),
+
+                    // Building Grid
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        childAspectRatio: 0.75,
+                      ),
+                      itemCount: availableBuildings.length,
+                      itemBuilder: (context, index) {
+                        final b = availableBuildings[index];
+                        final ub = progressMap[b.id] ?? UserBuilding(buildingId: b.id);
+                        final isStarted = (ub.progressMinutes > 0);
+                        return _buildBuildingCard(b, ub, isStarted);
+                      },
+                    ),
+
+                    SizedBox(height: 30),
+
+                    // My City Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 55,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => BuildingCollectionPage(),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFFF5F5F5),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "🏙️",
+                              style: TextStyle(fontSize: 24),
+                            ),
+                            SizedBox(width: 12),
+                            Text(
+                              "View My City",
+                              style: GoogleFonts.montserrat(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: 24),
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -226,7 +269,7 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen> {
           Container(
             height: 150,
             child: Center(
-              child: building.stages[currentStage].getImage(width: 180,height: 180),
+              child: building.stages[currentStage].getImage(width: 180, height: 180),
             ),
           ),
 
@@ -259,8 +302,9 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen> {
               value: progress,
               minHeight: 12,
               backgroundColor: Colors.white,
-              valueColor: AlwaysStoppedAnimation<Color>(Color.fromARGB(
-                  250, 147, 246, 246)),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                Color.fromARGB(250, 147, 246, 246),
+              ),
             ),
           ),
 
@@ -285,7 +329,7 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen> {
                 _startFocusSession(building);
               },
               child: Container(
-                decoration:BoxDecoration(
+                decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [Color(0xFFcdffd8), Color(0xFF94b9ff)],
                     begin: Alignment.centerLeft,
@@ -316,9 +360,7 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen> {
     );
   }
 
-  Widget _buildBuildingCard(Building building) {
-    UserBuilding userBuilding = _userDataService.getUserBuilding(building.id);
-    bool isStarted = _userDataService.isBuildingStarted(building.id);
+  Widget _buildBuildingCard(Building building, UserBuilding userBuilding, bool isStarted) {
     bool isCompleted = userBuilding.isCompleted;
 
     return Container(
