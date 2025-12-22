@@ -6,6 +6,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:build_your_focus/building_model/building_model.dart';
 import 'package:build_your_focus/user_data/user_data_service.dart';
 import 'package:build_your_focus/services/building_progress_firestore_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FocusSessionScreen extends StatefulWidget {
   final Building building;
@@ -54,14 +57,44 @@ class _FocusSessionScreenState extends State<FocusSessionScreen> {
     setState(() => _isRunning = false);
   }
 
-  // UPDATED: Save to Cloud
+  Future<void> _updateStreak() async {
+    final prefs = await SharedPreferences.getInstance();
+    const String lastDateKey = 'last_session_date';
+    const String streakKey = 'current_streak';
+
+    String today = DateTime.now().toString().split(' ')[0];
+    String lastDate = prefs.getString(lastDateKey) ?? "";
+    int currentStreak = prefs.getInt(streakKey) ?? 0;
+
+    if (lastDate == today) return;
+
+    String yesterday = DateTime.now().subtract(const Duration(days: 1)).toString().split(' ')[0];
+
+    if (lastDate == yesterday) {
+      currentStreak++;
+    } else {
+      currentStreak = 1;
+    }
+
+    await prefs.setString(lastDateKey, today);
+    await prefs.setInt(streakKey, currentStreak);
+  }
+
   Future<void> _stopSession() async {
     _timer?.cancel();
     int totalSeconds = _selectedDuration * 60;
     int secondsCompleted = totalSeconds - _remainingSeconds;
     int minutesCompleted = (secondsCompleted / 60).floor();
+    final user = FirebaseAuth.instance.currentUser;
 
-    if (minutesCompleted > 0) {
+    if (minutesCompleted > 0 && user != null) {
+      await FirebaseFirestore.instance.collection('sessions').add({
+        'userId': user.uid,
+        'buildingName': widget.building.name,
+        'duration': minutesCompleted,
+        'date': FieldValue.serverTimestamp(),
+      });
+
       await _progressService.addMinutes(
           buildingId: widget.building.id,
           minutesToAdd: minutesCompleted
@@ -78,13 +111,26 @@ class _FocusSessionScreenState extends State<FocusSessionScreen> {
     );
   }
 
-  // UPDATED: Save to Cloud
   Future<void> _completeSession() async {
     _timer?.cancel();
+    final user = FirebaseAuth.instance.currentUser;
+
+    await _updateStreak();
+
+    if (user != null) {
+      await FirebaseFirestore.instance.collection('sessions').add({
+        'userId': user.uid,
+        'buildingName': widget.building.name,
+        'duration': _selectedDuration,
+        'date': FieldValue.serverTimestamp(),
+      });
+    }
+
     await _progressService.addMinutes(
         buildingId: widget.building.id,
         minutesToAdd: _selectedDuration
     );
+
     if (!mounted) return;
     Navigator.pushReplacement(
       context,
@@ -254,7 +300,6 @@ class _FocusSessionScreenState extends State<FocusSessionScreen> {
             ),
           ),
         ]
-
       ],
     );
   }
