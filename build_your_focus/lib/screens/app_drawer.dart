@@ -2,19 +2,16 @@ import 'package:build_your_focus/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'help_page.dart';
 
-// Local colors for the drawer
-const Color kBackground = Color(0xFFF5F6FA);
-const Color kAccentBlue = Color(0xFF3B82F6);
-const Color kAccentGreen = Color(0xFF10B981);
-
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Automatically gets the name of the current page
     final String? currentRoute = ModalRoute.of(context)?.settings.name;
     final AuthService _authService = AuthService();
+
+    // This grabs the username from Firebase
+    final String userName = _authService.currentUser?.displayName ?? "User";
 
     return Drawer(
       backgroundColor: Colors.white,
@@ -27,35 +24,26 @@ class AppDrawer extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  CircleAvatar(
+                children: [
+                  const CircleAvatar(
                     radius: 26,
                     backgroundColor: Colors.white,
                     child: Icon(Icons.person, size: 30),
                   ),
-                  SizedBox(height: 12),
-                  Text(
+                  const SizedBox(height: 12),
+                  const Text(
                     "Welcome back,",
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.black54,
-                    ),
+                    style: TextStyle(fontSize: 13, color: Colors.black54),
                   ),
-                  SizedBox(height: 2),
+                  const SizedBox(height: 2),
                   Text(
-                    "Username !",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    "$userName !", // Now dynamic
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
                   ),
-                  SizedBox(height: 2),
-                  Text(
+                  const SizedBox(height: 2),
+                  const Text(
                     "Stay focused with us. 🔥",
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.black54,
-                    ),
+                    style: TextStyle(fontSize: 12, color: Colors.black54),
                   ),
                 ],
               ),
@@ -65,112 +53,92 @@ class AppDrawer extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 20),
               child: Divider(),
             ),
-            const SizedBox(height: 8),
 
-            // ----- MAIN MENU ITEMS -----
+            // ----- MAIN MENU ITEMS (Distributed Space) -----
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                children: [
-                  const SizedBox(height: 12),
-
-                  _DrawerItem(
-                    icon: Icons.home,
-                    label: "Home",
-                    // Highlight Home if route is explicitly home OR null (app start)
-                    isActive: currentRoute == '/home_page' || currentRoute == null,
-                    onTap: () {
-                      if (currentRoute != '/home_page') {
-                        Navigator.pushNamed(context, '/home_page');
-                      } else {
-                        Navigator.pop(context);
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  _DrawerItem(
-                    icon: Icons.check_box_outlined,
-                    label: "To-Do",
-                    isActive: currentRoute == '/to_do_page',
-                    onTap: () {
-                      if (currentRoute != '/to_do_page') {
-                        Navigator.pushNamed(context, '/to_do_page');
-                      } else {
-                        Navigator.pop(context);
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  _DrawerItem(
-                    icon: Icons.construction,
-                    label: "Construction",
-                    isActive: currentRoute == '/construction_page',
-                    onTap: () {
-                      if (currentRoute != '/construction_page') {
-                        Navigator.pushNamed(context, '/construction_page');
-                      } else {
-                        Navigator.pop(context);
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  _DrawerItem(
-                    icon: Icons.bar_chart_outlined,
-                    label: "Weekly Stats",
-                    isActive: currentRoute == '/weekly_stats',
-                    onTap: () => Navigator.pop(context),
-                  ),
-                  const SizedBox(height: 16),
-
-                  _DrawerItem(
-                    icon: Icons.location_city_outlined,
-                    label: "My City",
-                    isActive: currentRoute == '/building_page',
-                    onTap: () {
-                      if (currentRoute != '/building_page') {
-                        Navigator.pop(context);
-                        Navigator.pushNamed(context, '/building_page');
-                      } else {
-                        Navigator.pop(context);
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  _DrawerItem(
-                    icon: Icons.help_outline,
-                    label: "Help & Support",
-                    // This now works because we pass the name when pushing!
-                    isActive: currentRoute == '/help_page',
-                    onTap: () {
-                      if (currentRoute != '/help_page') {
-                        Navigator.pop(context);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => HelpPage(),
-                            // THIS LINE FIXES EVERYTHING:
-                            settings: const RouteSettings(name: '/help_page'),
-                          ),
-                        );
-                      } else {
-                        Navigator.pop(context);
-                      }
-                    },
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  _DrawerItem(
-                    icon: Icons.settings,
-                    label: "Settings",
-                    isActive: currentRoute == '/settings_page',
-                    onTap: () => Navigator.pop(context),
-                  ),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _DrawerItem(
+                      icon: Icons.home,
+                      label: "Home",
+                      isActive: currentRoute == '/home_page' || currentRoute == null,
+                      onTap: () {
+                        if (currentRoute != '/home_page') {
+                          Navigator.pushNamed(context, '/home_page');
+                        } else {
+                          Navigator.pop(context);
+                        }
+                      },
+                    ),
+                    _DrawerItem(
+                      icon: Icons.check_box_outlined,
+                      label: "To-Do",
+                      isActive: currentRoute == '/to_do_page',
+                      onTap: () {
+                        if (currentRoute != '/to_do_page') {
+                          Navigator.pushNamed(context, '/to_do_page');
+                        } else {
+                          Navigator.pop(context);
+                        }
+                      },
+                    ),
+                    _DrawerItem(
+                      icon: Icons.construction,
+                      label: "Construction",
+                      isActive: currentRoute == '/construction_page',
+                      onTap: () {
+                        if (currentRoute != '/construction_page') {
+                          Navigator.pushNamed(context, '/construction_page');
+                        } else {
+                          Navigator.pop(context);
+                        }
+                      },
+                    ),
+                    _DrawerItem(
+                      icon: Icons.location_city_outlined,
+                      label: "My City",
+                      isActive: currentRoute == '/building_page',
+                      onTap: () {
+                        if (currentRoute != '/building_page') {
+                          Navigator.pop(context);
+                          Navigator.pushNamed(context, '/building_page');
+                        } else {
+                          Navigator.pop(context);
+                        }
+                      },
+                    ),
+                    // Settings moved UP
+                    _DrawerItem(
+                      icon: Icons.settings,
+                      label: "Settings",
+                      isActive: currentRoute == '/settings_page',
+                      onTap: () => Navigator.pop(context),
+                    ),
+                    // Help & Support moved DOWN
+                    _DrawerItem(
+                      icon: Icons.help_outline,
+                      label: "Help & Support",
+                      isActive: currentRoute == '/help_page',
+                      onTap: () {
+                        if (currentRoute != '/help_page') {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => HelpPage(),
+                              settings: const RouteSettings(name: '/help_page'),
+                            ),
+                          );
+                        } else {
+                          Navigator.pop(context);
+                        }
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
 
@@ -193,31 +161,18 @@ class AppDrawer extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  InkWell(
-                    onTap: () {
-                      Navigator.pop(context);
+                  TextButton.icon(
+                    onPressed: () async {
+                      await _authService.signOut();
+                      if (context.mounted) {
+                        Navigator.pushNamedAndRemoveUntil(
+                            context, '/login_page', (route) => false);
+                      }
                     },
-                    child: Row(
-                      children: [
-                        TextButton.icon(
-                          onPressed: () async {
-                            await _authService.signOut();
-                            if (context.mounted) {
-                              Navigator.pushNamedAndRemoveUntil(
-                                  context, '/login_page', (route) => false);
-                            }
-                          },
-                          icon: const Icon(Icons.logout, size: 20, color: Colors.redAccent),
-                          label: const Text(
-                            "Log Out",
-                            style: TextStyle(
-                              color: Colors.redAccent,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 6),
-                      ],
+                    icon: const Icon(Icons.logout, size: 20, color: Colors.redAccent),
+                    label: const Text(
+                      "Log Out",
+                      style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600),
                     ),
                   ),
                   const Spacer(),
@@ -229,12 +184,9 @@ class AppDrawer extends StatelessWidget {
                     icon: const Icon(Icons.person_outline),
                     label: const Text("Profile"),
                     style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       foregroundColor: Colors.black87,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                     ),
                   ),
                 ],

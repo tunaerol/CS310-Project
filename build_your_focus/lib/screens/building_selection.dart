@@ -18,67 +18,45 @@ class BuildingSelectionScreen extends StatefulWidget {
 
 class _BuildingSelectionScreenState extends State<BuildingSelectionScreen> {
   final UserDataService _userDataService = UserDataService();
-  final BuildingProgressFirestoreService _progressService =
-  BuildingProgressFirestoreService();
-
+  final BuildingProgressFirestoreService _progressService = BuildingProgressFirestoreService();
   final List<Building> _buildings = BuildingData.getAllBuildings();
 
   @override
   Widget build(BuildContext context) {
-
-    String? currentBuildingId = _userDataService.getCurrentBuildingId();
-
     return StreamBuilder<Map<String, UserBuilding>>(
-      stream: _progressService.streamUserBuildings(),
+      stream: _progressService.streamUserBuildings(), // Real-time source
       builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return Scaffold(
-            drawer: AppDrawer(),
-            backgroundColor: Colors.white,
-            body: Center(
-              child: Text(
-                "Error: ${snapshot.error}",
-                style: GoogleFonts.montserrat(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          );
-        }
-
-        if (!snapshot.hasData) {
+        if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
           return const Scaffold(
             backgroundColor: Colors.white,
             body: Center(child: CircularProgressIndicator()),
           );
         }
 
-        final progressMap = snapshot.data!;
+        // Always use the data from snapshot to ensure consistency
+        final progressMap = snapshot.data ?? <String, UserBuilding>{};
 
-        // Current building + its progress (from Firestore)
-        Building? currentBuilding = currentBuildingId != null
-            ? BuildingData.getBuildingById(currentBuildingId)
-            : null;
+        String? currentBuildingId = _userDataService.getCurrentBuildingId();
 
-        UserBuilding? currentUserBuilding = currentBuildingId != null
-            ? (progressMap[currentBuildingId] ??
-            UserBuilding(buildingId: currentBuildingId))
-            : null;
+        UserBuilding? currentUserBuilding;
+        Building? currentBuilding;
+
+        if (currentBuildingId != null) {
+          currentBuilding = BuildingData.getBuildingById(currentBuildingId);
+          // Use Firestore progress even for the current project card
+          currentUserBuilding = progressMap[currentBuildingId] ?? UserBuilding(buildingId: currentBuildingId);
+        }
 
         List<Building> availableBuildings = _buildings.where((building) {
-          // Don't show the building if it's the current active project (and not completed)
-          if (currentBuildingId != null && building.id == currentBuildingId) {
-            UserBuilding ub = progressMap[building.id] ?? UserBuilding(buildingId: building.id);
-            if (!ub.isCompleted) {
-              return false; // Hide from grid - it's shown in "Current Project" section
-            }
+          final ub = progressMap[building.id] ?? UserBuilding(buildingId: building.id);
+          if (currentBuildingId != null && building.id == currentBuildingId && !ub.isCompleted) {
+            return false;
           }
           return true;
         }).toList();
 
         return Scaffold(
-          drawer: AppDrawer(),
+          drawer: const AppDrawer(),
           backgroundColor: Colors.white,
           body: SafeArea(
             child: SingleChildScrollView(
@@ -87,150 +65,39 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Header
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Builder(
-                          builder: (context) => IconButton(
-                            icon: Icon(Icons.menu, size: 28, color: Colors.black),
-                            onPressed: () => Scaffold.of(context).openDrawer(),
-                            padding: EdgeInsets.zero,
-                            constraints: BoxConstraints(),
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamed(context, '/profile_page');
-                          },
-                          child: CircleAvatar(
-                            radius: 20,
-                            backgroundColor: Color(0xFFF5F5F5),
-                            child: Icon(Icons.person, color: Colors.black),
-                          ),
-                        ),
-                      ],
-                    ),
+                    _buildHeader(context),
+                    const SizedBox(height: 30),
+                    _buildTitleSection(),
+                    const SizedBox(height: 30),
 
-                    SizedBox(height: 30),
-
-                    // Title
-                    Text(
-                      "Choose Your Project",
-                      style: GoogleFonts.montserrat(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.black,
-                      ),
-                    ),
-
-                    SizedBox(height: 8),
-
-                    Text(
-                      "Build monuments through focus",
-                      style: GoogleFonts.montserrat(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-
-                    SizedBox(height: 30),
-
-                    // Current Project (if exists)
-                    if (currentBuilding != null &&
-                        currentUserBuilding != null &&
-                        !currentUserBuilding.isCompleted) ...[
-                      Text(
-                        "Current Project",
-                        style: GoogleFonts.montserrat(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black,
-                        ),
-                      ),
-                      SizedBox(height: 12),
+                    if (currentBuilding != null && currentUserBuilding != null && !currentUserBuilding.isCompleted) ...[
+                      _buildLabel("Current Project"),
+                      const SizedBox(height: 12),
                       _buildCurrentProjectCard(currentBuilding, currentUserBuilding),
-                      SizedBox(height: 30),
+                      const SizedBox(height: 30),
                     ],
 
-                    // Available Buildings
-                    Text(
-                      currentBuilding != null
-                          ? "Choose New Project"
-                          : "Available Projects",
-                      style: GoogleFonts.montserrat(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.black,
-                      ),
-                    ),
+                    _buildLabel(currentBuilding != null ? "Choose New Project" : "Available Projects"),
+                    const SizedBox(height: 16),
 
-                    SizedBox(height: 16),
-
-                    // Building Grid
                     GridView.builder(
                       shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
                         crossAxisSpacing: 16,
                         mainAxisSpacing: 16,
-                        childAspectRatio: 0.75,
+                        childAspectRatio: 0.62,
                       ),
                       itemCount: availableBuildings.length,
                       itemBuilder: (context, index) {
                         final b = availableBuildings[index];
                         final ub = progressMap[b.id] ?? UserBuilding(buildingId: b.id);
-                        final isStarted = (ub.progressMinutes > 0);
-                        return _buildBuildingCard(b, ub, isStarted);
+                        return _buildBuildingCard(b, ub);
                       },
                     ),
-
-                    SizedBox(height: 30),
-
-                    // My City Button
-                    SizedBox(
-                      width: double.infinity,
-                      height: 55,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => BuildingCollectionPage(),
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFFF5F5F5),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                          elevation: 0,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "🏙️",
-                              style: TextStyle(fontSize: 24),
-                            ),
-                            SizedBox(width: 12),
-                            Text(
-                              "View My City",
-                              style: GoogleFonts.montserrat(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    SizedBox(height: 24),
+                    const SizedBox(height: 30),
+                    _buildMyCityButton(context),
                   ],
                 ),
               ),
@@ -241,229 +108,184 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen> {
     );
   }
 
+  Widget _buildHeader(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu, size: 28, color: Colors.black),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
+        ),
+        Text(
+          "Build Your Focus",
+          style: GoogleFonts.montserrat(fontSize: 20, fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(width: 48),
+      ],
+    );
+  }
+
+  Widget _buildTitleSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Choose Your Project",
+          style: GoogleFonts.montserrat(fontSize: 28, fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          "Build monuments through focus",
+          style: GoogleFonts.montserrat(fontSize: 16, color: Colors.grey[600]),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLabel(String text) {
+    return Text(
+      text,
+      style: GoogleFonts.montserrat(fontSize: 18, fontWeight: FontWeight.w700),
+    );
+  }
+
   Widget _buildCurrentProjectCard(Building building, UserBuilding userBuilding) {
     double progress = building.getProgress(userBuilding.progressMinutes);
     int currentStage = building.getCurrentStage(userBuilding.progressMinutes);
 
     return Container(
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Color(0xFFF5F5F5),
+        color: const Color(0xFFF5F5F5),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Color.fromARGB(250, 194, 194, 194), width: 2),
+        border: Border.all(color: Colors.grey.shade300, width: 2),
       ),
       child: Column(
         children: [
-          Text(
-            building.name,
-            style: GoogleFonts.montserrat(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: Colors.black,
-            ),
-          ),
-
-          SizedBox(height: 16),
-
-          // Building visualization placeholder
-          Container(
-            height: 150,
-            child: Center(
-              child: building.stages[currentStage].getImage(width: 180, height: 180),
-            ),
-          ),
-
-          SizedBox(height: 10),
-
-          Text(
-            "Stage ${currentStage + 1} of ${building.stages.length}",
-            style: GoogleFonts.montserrat(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: Colors.grey[600],
-            ),
-          ),
-
-          Text(
-            building.stages[currentStage].name,
-            style: GoogleFonts.montserrat(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.black,
-            ),
-          ),
-
-          SizedBox(height: 12),
-
-          // Progress bar
+          Text(building.name, style: GoogleFonts.montserrat(fontSize: 20, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 16),
+          building.stages[currentStage].getImage(height: 140, width: 140),
+          const SizedBox(height: 10),
+          Text("Stage ${currentStage + 1} of ${building.stages.length}",
+              style: GoogleFonts.montserrat(fontSize: 14, color: Colors.grey[600])),
+          Text(building.stages[currentStage].name,
+              style: GoogleFonts.montserrat(fontSize: 16, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 14),
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
             child: LinearProgressIndicator(
               value: progress,
-              minHeight: 12,
-              backgroundColor: Colors.white,
-              valueColor: AlwaysStoppedAnimation<Color>(
-                Color.fromARGB(250, 147, 246, 246),
-              ),
+              backgroundColor: Colors.grey[200],
+              valueColor: const AlwaysStoppedAnimation(Color(0xFF85DDB2)),
+              minHeight: 8,
             ),
           ),
-
-          SizedBox(height: 8),
-
-          Text(
-            "${userBuilding.progressMinutes} / ${building.requiredMinutes} minutes",
-            style: GoogleFonts.montserrat(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: Colors.grey[600],
-            ),
-          ),
-
-          SizedBox(height: 16),
-
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: GestureDetector(
-              onTap: () {
-                _startFocusSession(building);
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFcdffd8), Color(0xFF94b9ff)],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                  ),
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.play_arrow, color: Colors.black, size: 24),
-                    SizedBox(width: 8),
-                    Text(
-                      "Continue Building",
-                      style: GoogleFonts.montserrat(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
+          const SizedBox(height: 10),
+          Text("${userBuilding.progressMinutes} / ${building.requiredMinutes} min",
+              style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600)),
+          const SizedBox(height: 18),
+          _buildContinueButton(building),
         ],
       ),
     );
   }
 
-  Widget _buildBuildingCard(Building building, UserBuilding userBuilding, bool isStarted) {
+  Widget _buildContinueButton(Building building) {
+    return GestureDetector(
+      onTap: () => _startFocusSession(building),
+      child: Container(
+        height: 55,
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(colors: [Color(0xFFcdfdf8), Color(0xFF94b9ff)]),
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.play_arrow, color: Colors.black),
+            const SizedBox(width: 8),
+            Text("Continue Building",
+                style: GoogleFonts.montserrat(fontSize: 16, fontWeight: FontWeight.w700)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBuildingCard(Building building, UserBuilding userBuilding) {
+    bool isStarted = userBuilding.progressMinutes > 0;
     bool isCompleted = userBuilding.isCompleted;
+    int currentStage = building.getCurrentStage(userBuilding.progressMinutes);
 
     return Container(
       decoration: BoxDecoration(
-        color: isCompleted ? Colors.green[50] : Color(0xFFF5F5F5),
+        color: isCompleted ? Colors.green[50] : const Color(0xFFF5F5F5),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: isCompleted ? Colors.green : Colors.grey[300]!,
-          width: isCompleted ? 2 : 1,
-        ),
+        border: Border.all(color: isCompleted ? Colors.green : Colors.grey[300]!, width: isCompleted ? 2 : 1),
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(18),
-          onTap: isCompleted ? null : () => _startFocusSession(building),
-          child: Padding(
-            padding: const EdgeInsets.all(5.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (isCompleted)
-                  Icon(Icons.check_circle, color: Colors.green, size: 24),
-                Image.asset(
-                  building.completedImagePath,
-                  height: 120,
-                  width: 150,
-                  fit: BoxFit.cover,
-                ),
-
-                Text(
-                  building.name,
-                  style: GoogleFonts.montserrat(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: isCompleted ? null : () => _startFocusSession(building),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (isCompleted) const Icon(Icons.check_circle, color: Colors.green, size: 20),
+              Expanded(
+                child: building.stages[isCompleted ? building.stages.length - 1 : currentStage]
+                    .getImage(),
+              ),
+              const SizedBox(height: 8),
+              Text(building.name,
+                  style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w700),
+                  textAlign: TextAlign.center, maxLines: 1),
+              if (isStarted && !isCompleted) ...[
+                const SizedBox(height: 4),
+                Text("Stage ${currentStage + 1}", style: TextStyle(fontSize: 10, color: Colors.grey[600])),
+                const SizedBox(height: 4),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: building.getProgress(userBuilding.progressMinutes),
+                    minHeight: 4,
+                    valueColor: const AlwaysStoppedAnimation(Color(0xFF85DDB2)),
                   ),
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
                 ),
-                SizedBox(height: 12),
-
-                if (isCompleted)
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: Colors.green,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      "Complete",
-                      style: GoogleFonts.montserrat(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                  )
-                else if (isStarted)
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFFcdffd8), Color(0xFF94b9ff)],
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                      ),
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    child: Text(
-                      "In Progress",
-                      style: GoogleFonts.montserrat(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black,
-                      ),
-                    ),
-                  )
-                else
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFFcdffd8), Color(0xFF94b9ff)],
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                      ),
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    child: Text(
-                      "Start",
-                      style: GoogleFonts.montserrat(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
               ],
-            ),
+              const SizedBox(height: 8),
+              _buildBadge(isCompleted, isStarted),
+            ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildBadge(bool isCompleted, bool isStarted) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: isCompleted ? Colors.green : (isStarted ? const Color(0xFF85DDB2).withOpacity(0.3) : Colors.grey.shade200),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        isCompleted ? "Done" : (isStarted ? "Progress" : "Start"),
+        style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: isCompleted ? Colors.white : Colors.black),
+      ),
+    );
+  }
+
+  Widget _buildMyCityButton(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 55,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFF5F5F5), elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18))),
+        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const BuildingCollectionPage())),
+        child: Text("View My City", style: GoogleFonts.montserrat(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.black)),
       ),
     );
   }
@@ -472,11 +294,9 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen> {
     _userDataService.setCurrentBuilding(building.id);
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => FocusSessionScreen(building: building),
-      ),
+      MaterialPageRoute(builder: (context) => FocusSessionScreen(building: building)),
     ).then((_) {
-      setState(() {}); // Refresh after returning
+      if (mounted) setState(() {});
     });
   }
 }

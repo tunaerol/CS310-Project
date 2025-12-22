@@ -36,9 +36,9 @@ class _SignUpPageState extends State<SignUpPage> {
     final email = _controllerEmail.text.trim();
     final password = _controllerPassword.text;
 
-    if (email.isEmpty || password.isEmpty) {
+    if (username.isEmpty || email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Email or password can not be empty.')),
+        const SnackBar(content: Text('All fields are required.')),
       );
       return;
     }
@@ -50,12 +50,15 @@ class _SignUpPageState extends State<SignUpPage> {
       return;
     }
 
-
     FocusScope.of(context).unfocus();
-
     setState(() => _loading = true);
 
-    final error = await _authService.signUp(email: email, password: password);
+    // Now passing the username
+    final error = await _authService.signUp(
+      email: email,
+      password: password,
+      username: username,
+    );
 
     if (!mounted) return;
 
@@ -66,7 +69,6 @@ class _SignUpPageState extends State<SignUpPage> {
       );
       return;
     }
-
 
     Navigator.pushNamedAndRemoveUntil(
       context,
@@ -97,11 +99,7 @@ class _SignUpPageState extends State<SignUpPage> {
       body: SafeArea(
         child: SingleChildScrollView(
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          padding: EdgeInsets.only(
-            left: 50,
-            right: 50,
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 50),
           child: Column(
             children: [
               Row(
@@ -335,7 +333,6 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 24),
             ],
           ),
