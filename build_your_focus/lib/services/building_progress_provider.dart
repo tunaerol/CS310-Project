@@ -8,8 +8,7 @@ class BuildingProgressProvider with ChangeNotifier {
   Stream<List<FocusSessionModel>> getWeeklySessions(String userId) {
     return _db
         .collection('sessions')
-        .where('userId', isEqualTo: userId)
-        .orderBy('date', descending: true)
+        .where('createdBy', isEqualTo: userId)
         .snapshots()
         .map((snapshot) => snapshot.docs
         .map((doc) => FocusSessionModel.fromFirestore(doc))

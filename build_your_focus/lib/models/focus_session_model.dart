@@ -17,12 +17,13 @@ class FocusSessionModel {
 
   factory FocusSessionModel.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data() as Map<String, dynamic>;
+    final ts = data['createdAt'];
     return FocusSessionModel(
       id: doc.id,
       buildingName: data['buildingName'] ?? '',
       duration: data['duration'] ?? 0,
-      date: (data['date'] as Timestamp).toDate(),
-      userId: data['userId'] ?? '',
+      date: ts is Timestamp ? ts.toDate() : DateTime.now(),
+      userId: data['createdBy'] ?? '',
     );
   }
 }
