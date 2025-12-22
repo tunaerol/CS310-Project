@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import 'firebase_options.dart';
 // Screens
 import 'screens/auth/opening_page.dart';
@@ -17,6 +15,7 @@ import 'screens/construction_progress.dart';
 // Services
 import 'services/todotask_provider.dart';
 import 'services/building_progress_provider.dart';
+import 'services/auth_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,7 +37,7 @@ class _FocusAppState extends State<FocusApp> {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        // Rubric 6: Registering all providers at the root
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ToDoTaskProvider()),
         ChangeNotifierProvider(create: (_) => BuildingProgressProvider()),
       ],
@@ -72,22 +71,16 @@ class AuthWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Rubric 10: Listening to real-time Auth state changes
-    return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-        // If logged in, go to Selection screen, otherwise Opening page
-        if (snapshot.hasData) {
-          return const BuildingSelectionScreen();
-        } else {
-          return const FirstOpening();
-        }
-      },
-    );
+    final auth = context.watch<AuthProvider>();
+    if (auth.user == null && !auth.isLoggedIn) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+    if (auth.isLoggedIn) {
+      return const BuildingSelectionScreen();
+    } else {
+      return const FirstOpening();
+    }
   }
 }
