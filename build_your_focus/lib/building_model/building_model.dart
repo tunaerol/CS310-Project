@@ -88,7 +88,7 @@ class BuildingData {
           id: 'pyramid',
           name: 'Pyramid',
           completedImagePath: "lib/assets/images/buildings/pyramid/pyramid10.png",
-          requiredMinutes: 180,
+          requiredMinutes: 5 * 60,
           description: "A building that comes from ancient times",
           stages: [
             BuildingStage(
@@ -159,7 +159,7 @@ class BuildingData {
         id: 'anitkabir',
         name: 'Anıtkabir',
         completedImagePath: "lib/assets/images/buildings/anitkabir/anitkabir8.png",
-        requiredMinutes: 200,
+        requiredMinutes: 5*60,
         description: 'Build the place of Father of The Turks',
         stages: [
           BuildingStage(

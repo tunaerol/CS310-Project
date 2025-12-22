@@ -24,14 +24,14 @@ class _FocusSessionScreenState extends State<FocusSessionScreen> {
   final SessionFirestoreService _sessionService = SessionFirestoreService();
 
   Timer? _timer;
-  int _selectedDuration = 60;
+  int _selectedDuration = 120;
   int _remainingSeconds = 1;
   bool _isRunning = false;
 
   @override
   void initState() {
     super.initState();
-    _remainingSeconds = 0;
+    _remainingSeconds = 1;
   }
 
   @override

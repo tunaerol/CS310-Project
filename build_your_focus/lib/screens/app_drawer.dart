@@ -7,11 +7,18 @@ class AppDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Mevcut sayfanın adını alıyoruz
     final String? currentRoute = ModalRoute.of(context)?.settings.name;
     final AuthService _authService = AuthService();
 
-    // This grabs the username from Firebase
     final String userName = _authService.currentUser?.displayName ?? "User";
+
+    // Ortak gradyan stilimiz
+    const LinearGradient activeGradient = LinearGradient(
+      colors: [Color(0xFFcdffd8), Color(0xFF94b9ff)],
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+    );
 
     return Drawer(
       backgroundColor: Colors.white,
@@ -37,7 +44,7 @@ class AppDrawer extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    "$userName !", // Now dynamic
+                    "$userName !",
                     style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 2),
@@ -54,7 +61,7 @@ class AppDrawer extends StatelessWidget {
               child: Divider(),
             ),
 
-            // ----- MAIN MENU ITEMS (Distributed Space) -----
+            // ----- MAIN MENU ITEMS -----
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
@@ -110,14 +117,12 @@ class AppDrawer extends StatelessWidget {
                         }
                       },
                     ),
-                    // Settings moved UP
                     _DrawerItem(
                       icon: Icons.settings,
                       label: "Settings",
                       isActive: currentRoute == '/settings_page',
                       onTap: () => Navigator.pop(context),
                     ),
-                    // Help & Support moved DOWN
                     _DrawerItem(
                       icon: Icons.help_outline,
                       label: "Help & Support",
@@ -176,17 +181,29 @@ class AppDrawer extends StatelessWidget {
                     ),
                   ),
                   const Spacer(),
-                  TextButton.icon(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      Navigator.pushNamed(context, '/profile_page');
-                    },
-                    icon: const Icon(Icons.person_outline),
-                    label: const Text("Profile"),
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      foregroundColor: Colors.black87,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                  // Profil butonu alanı: Aktifse gradyan çerçeve ekledik
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: currentRoute == '/profile_page' ? activeGradient : null,
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: TextButton.icon(
+                      onPressed: () {
+                        if (currentRoute != '/profile_page') {
+                          Navigator.pop(context);
+                          Navigator.pushNamed(context, '/profile_page');
+                        } else {
+                          Navigator.pop(context);
+                        }
+                      },
+                      icon: const Icon(Icons.person_outline),
+                      label: const Text("Profile"),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        foregroundColor: Colors.black87,
+                        // Gradyan görünebilmesi için butonun kendi rengini şeffaf yaptık (aktifken)
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                      ),
                     ),
                   ),
                 ],
