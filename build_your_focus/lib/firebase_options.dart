@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -63,7 +60,19 @@ class DefaultFirebaseOptions {
     messagingSenderId: '296257558958',
     projectId: 'build-your-focus',
     storageBucket: 'build-your-focus.firebasestorage.app',
+    androidClientId: '296257558958-ohpgj8hrgnfopr0jgkv9ngl1tqdfbeh1.apps.googleusercontent.com',
+    iosClientId: '296257558958-s0kf5fpm934iiuobcf8q2av03l40o4je.apps.googleusercontent.com',
     iosBundleId: 'com.example.buildYourFocus',
+  );
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyC7g08FMNtEOJ0Fmipzrkbwn3st1NnpcoM',
+    appId: '1:296257558958:web:d528b98351527fae3d103f',
+    messagingSenderId: '296257558958',
+    projectId: 'build-your-focus',
+    authDomain: 'build-your-focus.firebaseapp.com',
+    storageBucket: 'build-your-focus.firebasestorage.app',
+    measurementId: 'G-8QFRPZS7LX',
   );
 
 }
