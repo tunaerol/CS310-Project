@@ -1,5 +1,3 @@
-// screens/completion_screen.dart
-
 import 'package:build_your_focus/screens/building_collection_page.dart';
 import 'package:build_your_focus/screens/focus_session_screen.dart';
 import 'package:build_your_focus/screens/building_selection.dart';
@@ -67,7 +65,6 @@ class CompletionScreen extends StatelessWidget {
                 children: [
                   const SizedBox(height: 40),
 
-                  // Celebration header
                   Text(
                     isComplete ? "🎉 Building Complete!" : "✨ Great Work!",
                     style: GoogleFonts.montserrat(
@@ -94,7 +91,6 @@ class CompletionScreen extends StatelessWidget {
 
                   const SizedBox(height: 40),
 
-                  // Building display
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
@@ -156,7 +152,6 @@ class CompletionScreen extends StatelessWidget {
 
                   const SizedBox(height: 24),
 
-                  // Progress section
                   Container(
                     padding: const EdgeInsets.all(18),
                     decoration: BoxDecoration(
@@ -240,96 +235,166 @@ class CompletionScreen extends StatelessWidget {
 
                   const SizedBox(height: 18),
 
-                  // Buttons
-                  SizedBox(
-                    width: double.infinity,
-                    height: 55,
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => FocusSessionScreen(building: building),
+                  if (isComplete) ...[
+                    SizedBox(
+                      width: double.infinity,
+                      height: 55,
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => BuildingCollectionPage(),
+                              settings: const RouteSettings(name: '/building_page'),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFFcdffd8), Color(0xFF94b9ff)],
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                            ),
+                            borderRadius: BorderRadius.circular(18),
                           ),
-                        );
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFFcdffd8), Color(0xFF94b9ff)],
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                          ),
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                        child: Center(
-                          child: Text(
-                            isComplete ? "Build Another" : "Continue Building",
-                            style: GoogleFonts.montserrat(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.black,
+                          child: Center(
+                            child: Text(
+                              "🏙️ View My City",
+                              style: GoogleFonts.montserrat(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.black,
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
 
+                    const SizedBox(height: 12),
 
-                  const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 55,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const BuildingSelectionScreen(),
+                            ),
+                                (route) => false,
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          "Build Another Project",
+                          style: GoogleFonts.montserrat(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ] else ...[
+                    SizedBox(
+                      width: double.infinity,
+                      height: 55,
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => FocusSessionScreen(building: building),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFFcdffd8), Color(0xFF94b9ff)],
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                            ),
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: Center(
+                            child: Text(
+                              "Continue Building",
+                              style: GoogleFonts.montserrat(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
 
-                  SizedBox(
-                    width: double.infinity,
-                    height: 55,
-                    child: ElevatedButton(
+                    const SizedBox(height: 12),
+
+                    SizedBox(
+                      width: double.infinity,
+                      height: 55,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const BuildingSelectionScreen(),
+                            ),
+                                (route) => false,
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          "Choose Another Project",
+                          style: GoogleFonts.montserrat(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    TextButton(
                       onPressed: () {
-                        Navigator.pushAndRemoveUntil(
+                        Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const BuildingSelectionScreen(),
+                            builder: (context) => BuildingCollectionPage(),
+                            settings: const RouteSettings(name: '/building_page'),
                           ),
-                              (route) => false,
                         );
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                        elevation: 0,
-                      ),
                       child: Text(
-                        "Choose Another Project",
+                        "View My City",
                         style: GoogleFonts.montserrat(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.grey[700],
                         ),
                       ),
                     ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => BuildingCollectionPage(),
-                        ),
-                      );
-                    },
-                    child: Text(
-                      "View My City",
-                      style: GoogleFonts.montserrat(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.grey[700],
-                      ),
-                    ),
-                  ),
+                  ],
                 ],
               ),
             ),

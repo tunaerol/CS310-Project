@@ -1,5 +1,3 @@
-// screens/building_selection_screen.dart
-
 import 'package:build_your_focus/screens/building_collection_page.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -24,7 +22,7 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<Map<String, UserBuilding>>(
-      stream: _progressService.streamUserBuildings(), // Real-time source
+      stream: _progressService.streamUserBuildings(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
           return const Scaffold(
@@ -33,7 +31,6 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen> {
           );
         }
 
-        // Always use the data from snapshot to ensure consistency
         final progressMap = snapshot.data ?? <String, UserBuilding>{};
 
         String? currentBuildingId = _userDataService.getCurrentBuildingId();
@@ -43,17 +40,26 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen> {
 
         if (currentBuildingId != null) {
           currentBuilding = BuildingData.getBuildingById(currentBuildingId);
-          // Use Firestore progress even for the current project card
           currentUserBuilding = progressMap[currentBuildingId] ?? UserBuilding(buildingId: currentBuildingId);
         }
 
         List<Building> availableBuildings = _buildings.where((building) {
           final ub = progressMap[building.id] ?? UserBuilding(buildingId: building.id);
-          if (currentBuildingId != null && building.id == currentBuildingId && !ub.isCompleted) {
+
+          if (ub.isCompleted) {
             return false;
           }
+
+          if (currentBuildingId != null && building.id == currentBuildingId) {
+            return false;
+          }
+
           return true;
         }).toList();
+
+        bool hasActiveProject = currentBuilding != null &&
+            currentUserBuilding != null &&
+            !currentUserBuilding.isCompleted;
 
         return Scaffold(
           drawer: const AppDrawer(),
@@ -70,32 +76,37 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen> {
                     _buildTitleSection(),
                     const SizedBox(height: 30),
 
-                    if (currentBuilding != null && currentUserBuilding != null && !currentUserBuilding.isCompleted) ...[
+                    if (hasActiveProject) ...[
                       _buildLabel("Current Project"),
                       const SizedBox(height: 12),
-                      _buildCurrentProjectCard(currentBuilding, currentUserBuilding),
+                      _buildCurrentProjectCard(currentBuilding!, currentUserBuilding!),
                       const SizedBox(height: 30),
                     ],
 
-                    _buildLabel(currentBuilding != null ? "Choose New Project" : "Available Projects"),
-                    const SizedBox(height: 16),
+                    if (availableBuildings.isEmpty && !hasActiveProject) ...[
+                      _buildAllCompletedMessage(),
+                    ] else if (availableBuildings.isNotEmpty) ...[
+                      _buildLabel(hasActiveProject ? "Choose New Project" : "Available Projects"),
+                      const SizedBox(height: 16),
 
-                    GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                        childAspectRatio: 0.62,
+                      GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                          childAspectRatio: 0.62,
+                        ),
+                        itemCount: availableBuildings.length,
+                        itemBuilder: (context, index) {
+                          final b = availableBuildings[index];
+                          final ub = progressMap[b.id] ?? UserBuilding(buildingId: b.id);
+                          return _buildBuildingCard(b, ub);
+                        },
                       ),
-                      itemCount: availableBuildings.length,
-                      itemBuilder: (context, index) {
-                        final b = availableBuildings[index];
-                        final ub = progressMap[b.id] ?? UserBuilding(buildingId: b.id);
-                        return _buildBuildingCard(b, ub);
-                      },
-                    ),
+                    ],
+
                     const SizedBox(height: 30),
                     _buildMyCityButton(context),
                   ],
@@ -198,7 +209,7 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen> {
       child: Container(
         height: 55,
         decoration: BoxDecoration(
-          gradient: const LinearGradient(colors: [Color(0xFFcdfdf8), Color(0xFF94b9ff)]),
+          gradient: const LinearGradient(colors: [Color(0xFFcdffd8), Color(0xFF94b9ff)]),
           borderRadius: BorderRadius.circular(18),
         ),
         child: Row(
@@ -216,33 +227,30 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen> {
 
   Widget _buildBuildingCard(Building building, UserBuilding userBuilding) {
     bool isStarted = userBuilding.progressMinutes > 0;
-    bool isCompleted = userBuilding.isCompleted;
     int currentStage = building.getCurrentStage(userBuilding.progressMinutes);
 
     return Container(
       decoration: BoxDecoration(
-        color: isCompleted ? Colors.green[50] : const Color(0xFFF5F5F5),
+        color: const Color(0xFFF5F5F5),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: isCompleted ? Colors.green : Colors.grey[300]!, width: isCompleted ? 2 : 1),
+        border: Border.all(color: Colors.grey[300]!, width: 1),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
-        onTap: isCompleted ? null : () => _startFocusSession(building),
+        onTap: () => _startFocusSession(building),
         child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (isCompleted) const Icon(Icons.check_circle, color: Colors.green, size: 20),
               Expanded(
-                child: building.stages[isCompleted ? building.stages.length - 1 : currentStage]
-                    .getImage(),
+                child: building.stages[currentStage].getImage(),
               ),
               const SizedBox(height: 8),
               Text(building.name,
                   style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w700),
                   textAlign: TextAlign.center, maxLines: 1),
-              if (isStarted && !isCompleted) ...[
+              if (isStarted) ...[
                 const SizedBox(height: 4),
                 Text("Stage ${currentStage + 1}", style: TextStyle(fontSize: 10, color: Colors.grey[600])),
                 const SizedBox(height: 4),
@@ -256,7 +264,7 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen> {
                 ),
               ],
               const SizedBox(height: 8),
-              _buildBadge(isCompleted, isStarted),
+              _buildBadge(isStarted),
             ],
           ),
         ),
@@ -264,16 +272,55 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen> {
     );
   }
 
-  Widget _buildBadge(bool isCompleted, bool isStarted) {
+  Widget _buildBadge(bool isStarted) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: isCompleted ? Colors.green : (isStarted ? const Color(0xFF85DDB2).withOpacity(0.3) : Colors.grey.shade200),
+        color: isStarted ? const Color(0xFF85DDB2).withOpacity(0.3) : Colors.grey.shade200,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
-        isCompleted ? "Done" : (isStarted ? "Progress" : "Start"),
-        style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: isCompleted ? Colors.white : Colors.black),
+        isStarted ? "Progress" : "Start",
+        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black),
+      ),
+    );
+  }
+
+  Widget _buildAllCompletedMessage() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(40),
+      decoration: BoxDecoration(
+        color: Colors.green[50],
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.green, width: 2),
+      ),
+      child: Column(
+        children: [
+          const Text(
+            "🎉",
+            style: TextStyle(fontSize: 60),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            "Congratulations!",
+            style: GoogleFonts.montserrat(
+              fontSize: 24,
+              fontWeight: FontWeight.w800,
+              color: Colors.green[700],
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            "You've completed all buildings!\nYour city is now complete.",
+            style: GoogleFonts.montserrat(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }
@@ -282,10 +329,34 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen> {
     return SizedBox(
       width: double.infinity,
       height: 55,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFF5F5F5), elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18))),
-        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const BuildingCollectionPage())),
-        child: Text("View My City", style: GoogleFonts.montserrat(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.black)),
+      child: GestureDetector(
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const BuildingCollectionPage(),
+            settings: const RouteSettings(name: '/building_page'),
+          ),
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFFcdffd8), Color(0xFF94b9ff)],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Center(
+            child: Text(
+              "🏙️ View My City",
+              style: GoogleFonts.montserrat(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: Colors.black,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
