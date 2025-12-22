@@ -14,7 +14,7 @@ class BuildingProgressFirestoreService {
   // READ (stream) -> satisfies real-time requirement
   Stream<Map<String, UserBuilding>> streamUserBuildings() {
     final user = _auth.currentUser;
-    if (user == null) return const Stream.empty();
+    if (user == null) return Stream.value({});
 
     return _col(user.uid).snapshots().map((snap) {
       final map = <String, UserBuilding>{};

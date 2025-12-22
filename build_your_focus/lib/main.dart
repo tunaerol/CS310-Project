@@ -72,15 +72,10 @@ class AuthWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
-    if (auth.user == null && !auth.isLoggedIn) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
+
     if (auth.isLoggedIn) {
       return const BuildingSelectionScreen();
-    } else {
-      return const FirstOpening();
     }
+    return const FirstOpening();
   }
-}
+  }
