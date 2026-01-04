@@ -375,22 +375,36 @@ class CompletionScreen extends StatelessWidget {
 
                     const SizedBox(height: 12),
 
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
+                    SizedBox(
+                      width: double.infinity,
+                      height: 55,
+                      child: GestureDetector(
+                        onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => BuildingCollectionPage(),
+                            builder: (context) => const BuildingCollectionPage(),
                             settings: const RouteSettings(name: '/building_page'),
                           ),
-                        );
-                      },
-                      child: Text(
-                        "View My City",
-                        style: GoogleFonts.montserrat(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.grey[700],
+                        ),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFFcdffd8), Color(0xFF94b9ff)],
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                            ),
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: Center(
+                            child: Text(
+                              "🏙️ View My City",
+                              style: GoogleFonts.montserrat(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),

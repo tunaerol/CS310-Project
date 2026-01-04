@@ -7,13 +7,11 @@ class AppDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Mevcut sayfanın adını alıyoruz
     final String? currentRoute = ModalRoute.of(context)?.settings.name;
     final AuthService _authService = AuthService();
 
     final String userName = _authService.currentUser?.displayName ?? "User";
 
-    // Ortak gradyan stilimiz
     const LinearGradient activeGradient = LinearGradient(
       colors: [Color(0xFFcdffd8), Color(0xFF94b9ff)],
       begin: Alignment.centerLeft,
@@ -34,8 +32,8 @@ class AppDrawer extends StatelessWidget {
                 children: [
                   const CircleAvatar(
                     radius: 26,
-                    backgroundColor: Colors.white,
-                    child: Icon(Icons.person, size: 30),
+                    backgroundColor: Color(0xFFF5F5F5),
+                    child: Icon(Icons.person, size: 30, color: Colors.black54),
                   ),
                   const SizedBox(height: 12),
                   const Text(
@@ -44,8 +42,9 @@ class AppDrawer extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    "$userName !",
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+                    "$userName!",
+                    style: const TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 2),
                   const Text(
@@ -61,17 +60,21 @@ class AppDrawer extends StatelessWidget {
               child: Divider(),
             ),
 
-            // ----- MAIN MENU ITEMS -----
+            // ----- MENU ITEMS -----
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // ══════ MAIN ══════
+                    const _SectionHeader(title: "MAIN"),
+                    const SizedBox(height: 8),
                     _DrawerItem(
-                      icon: Icons.home,
+                      icon: Icons.home_rounded,
                       label: "Home",
-                      isActive: currentRoute == '/home_page' || currentRoute == null,
+                      isActive:
+                      currentRoute == '/home_page' || currentRoute == null,
                       onTap: () {
                         if (currentRoute != '/home_page') {
                           Navigator.pushNamed(context, '/home_page');
@@ -80,6 +83,7 @@ class AppDrawer extends StatelessWidget {
                         }
                       },
                     ),
+                    const SizedBox(height: 6),
                     _DrawerItem(
                       icon: Icons.check_box_outlined,
                       label: "To-Do",
@@ -92,8 +96,14 @@ class AppDrawer extends StatelessWidget {
                         }
                       },
                     ),
+
+                    const SizedBox(height: 20),
+
+                    // ══════ BUILD ══════
+                    const _SectionHeader(title: "BUILD"),
+                    const SizedBox(height: 8),
                     _DrawerItem(
-                      icon: Icons.construction,
+                      icon: Icons.construction_rounded,
                       label: "Construction",
                       isActive: currentRoute == '/construction_page',
                       onTap: () {
@@ -104,8 +114,9 @@ class AppDrawer extends StatelessWidget {
                         }
                       },
                     ),
+                    const SizedBox(height: 6),
                     _DrawerItem(
-                      icon: Icons.location_city_outlined,
+                      icon: Icons.location_city_rounded,
                       label: "My City",
                       isActive: currentRoute == '/building_page',
                       onTap: () {
@@ -117,14 +128,14 @@ class AppDrawer extends StatelessWidget {
                         }
                       },
                     ),
+
+                    const SizedBox(height: 20),
+
+                    // ══════ OTHER ══════
+                    const _SectionHeader(title: "OTHER"),
+                    const SizedBox(height: 8),
                     _DrawerItem(
-                      icon: Icons.settings,
-                      label: "Settings",
-                      isActive: currentRoute == '/settings_page',
-                      onTap: () => Navigator.pop(context),
-                    ),
-                    _DrawerItem(
-                      icon: Icons.help_outline,
+                      icon: Icons.help_outline_rounded,
                       label: "Help & Support",
                       isActive: currentRoute == '/help_page',
                       onTap: () {
@@ -134,7 +145,8 @@ class AppDrawer extends StatelessWidget {
                             context,
                             MaterialPageRoute(
                               builder: (_) => HelpPage(),
-                              settings: const RouteSettings(name: '/help_page'),
+                              settings:
+                              const RouteSettings(name: '/help_page'),
                             ),
                           );
                         } else {
@@ -142,6 +154,8 @@ class AppDrawer extends StatelessWidget {
                         }
                       },
                     ),
+
+                    const Spacer(),
                   ],
                 ),
               ),
@@ -177,14 +191,15 @@ class AppDrawer extends StatelessWidget {
                     icon: const Icon(Icons.logout, size: 20, color: Colors.redAccent),
                     label: const Text(
                       "Log Out",
-                      style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                          color: Colors.redAccent, fontWeight: FontWeight.w600),
                     ),
                   ),
                   const Spacer(),
-                  // Profil butonu alanı: Aktifse gradyan çerçeve ekledik
                   Container(
                     decoration: BoxDecoration(
-                      gradient: currentRoute == '/profile_page' ? activeGradient : null,
+                      gradient:
+                      currentRoute == '/profile_page' ? activeGradient : null,
                       borderRadius: BorderRadius.circular(24),
                     ),
                     child: TextButton.icon(
@@ -199,10 +214,11 @@ class AppDrawer extends StatelessWidget {
                       icon: const Icon(Icons.person_outline),
                       label: const Text("Profile"),
                       style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
                         foregroundColor: Colors.black87,
-                        // Gradyan görünebilmesi için butonun kendi rengini şeffaf yaptık (aktifken)
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24)),
                       ),
                     ),
                   ),
@@ -216,6 +232,49 @@ class AppDrawer extends StatelessWidget {
   }
 }
 
+// ----- SECTION HEADER -----
+class _SectionHeader extends StatelessWidget {
+  final String title;
+
+  const _SectionHeader({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 20,
+          height: 2,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFFcdffd8), Color(0xFF94b9ff)],
+            ),
+            borderRadius: BorderRadius.circular(1),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: Colors.black38,
+            letterSpacing: 1.2,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Container(
+            height: 1,
+            color: Colors.black12,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ----- DRAWER ITEM -----
 class _DrawerItem extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -240,26 +299,29 @@ class _DrawerItem extends StatelessWidget {
           end: Alignment.centerRight,
         )
             : null,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(14),
       ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-          child: Row(
-            children: [
-              Icon(icon, size: 22, color: Colors.black87),
-              const SizedBox(width: 12),
-              Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(14),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
+            child: Row(
+              children: [
+                Icon(icon, size: 22, color: Colors.black87),
+                const SizedBox(width: 14),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
