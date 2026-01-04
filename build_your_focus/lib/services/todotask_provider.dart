@@ -3,7 +3,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/todotask_model.dart';
 
 class ToDoTaskProvider extends ChangeNotifier {
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  final FirebaseFirestore _db;
+
+  ToDoTaskProvider({FirebaseFirestore? db})
+      : _db = db ?? FirebaseFirestore.instance;
+
 
   // 1. READ: Get a real-time stream of tasks for a specific user
   // This satisfies the "Real-time updates" requirement [cite: 34, 60]
