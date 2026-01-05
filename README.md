@@ -8,13 +8,12 @@
 * A collection page to view user's completed buildings
 * Simple and clean user interface built with Flutter
 
-## 👥 Team Members
+### Team Members
 * Duru İlhan (34083)  
 * İpek İnal (33788)  
 * Mert Can Kılıç (32140)  
 * Tuna Erol (32008)
 
----
 
 ## ⚙️ Step-by-Step Setup and Run Instructions
 
@@ -30,7 +29,6 @@
    git clone [https://github.com/tunaerol/CS310-Project.git](https://github.com/tunaerol/CS310-Project.git)
 * run the command: flutter run and select the desired device/web
 
----
 
 ## ✅ Running Tests
 
@@ -44,7 +42,6 @@
 * **Test Case**: Verifies that the FirstOpening renders the PageView and AnimatedSwitcher correctly, ensuring a functional onboarding flow.
 * **Running Specific Test**: flutter test test/opening_page_test.dart
 
----
 
 ## 🔐 Known Limitations
 
