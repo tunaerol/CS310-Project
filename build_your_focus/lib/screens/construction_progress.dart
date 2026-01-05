@@ -26,10 +26,9 @@ class _ConstructionProgressScreenState extends State<ConstructionProgressScreen>
   @override
   void initState() {
     super.initState();
-    _loadCurrentStreak(); // Step 3: Local persistence
+    _loadCurrentStreak();
   }
 
-  // --- LOCAL PERSISTENCE (SharedPreferences) ---
   Future<void> _loadCurrentStreak() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -37,7 +36,6 @@ class _ConstructionProgressScreenState extends State<ConstructionProgressScreen>
     });
   }
 
-  // Dynamic Date Range Calculation
   String _getWeekRange() {
     DateTime now = DateTime.now();
     DateTime monday = now.subtract(Duration(days: now.weekday - 1));
@@ -45,8 +43,6 @@ class _ConstructionProgressScreenState extends State<ConstructionProgressScreen>
     List<String> months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     return "${months[monday.month - 1]} ${monday.day} - ${months[sunday.month - 1]} ${sunday.day}";
   }
-
-  // --- UI BUILDER METHODS (RESTORED ORIGINALS) ---
 
   Widget _buildHeader() {
     return Row(
@@ -86,14 +82,11 @@ class _ConstructionProgressScreenState extends State<ConstructionProgressScreen>
   }
 
   Widget _buildProgressCards(List<FocusSessionModel> sessions) {
-    // 1. Total Construction Time (Sum of all durations)
     int totalMinutes = sessions.fold(0, (sum, s) => sum + s.duration);
     String totalTimeStr = "${totalMinutes ~/ 60}h ${totalMinutes % 60}m";
 
-    // 2. Daily Blueprint (Count of sessions)
     int sessionCount = sessions.length;
 
-    // 3. Longest Work Session (Max duration found)
     int longest = sessions.isEmpty ? 0 : sessions.map((s) => s.duration).reduce(max);
     String longestStr = longest >= 60 ? "${longest ~/ 60}h ${longest % 60}m" : "${longest}m";
 
@@ -112,7 +105,6 @@ class _ConstructionProgressScreenState extends State<ConstructionProgressScreen>
 
   @override
   Widget build(BuildContext context) {
-    // Rubric 6: Provider state management
     final progressProvider = Provider.of<BuildingProgressProvider>(context);
 
     return Scaffold(
@@ -129,16 +121,15 @@ class _ConstructionProgressScreenState extends State<ConstructionProgressScreen>
           ),
         ),
       ),
-      // Rubric 9: Real-time UI updates via StreamBuilder
       body: StreamBuilder<List<FocusSessionModel>>(
         stream: progressProvider.getWeeklySessions(userId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator()); // Rubric 8: Loading state
+            return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
             print("DEBUG FIRESTORE ERROR: ${snapshot.error}");
-            return const Center(child: Text('Error loading progress')); // Rubric 8: Error state
+            return const Center(child: Text('Error loading progress'));
           }
 
           final sessions = snapshot.data ?? [];
@@ -154,7 +145,7 @@ class _ConstructionProgressScreenState extends State<ConstructionProgressScreen>
                   const SizedBox(height: 24),
                   _buildProgressCards(sessions),
                   const SizedBox(height: 24),
-                  FocusStatisticsCard(sessions: sessions), // Fixed parameter name
+                  FocusStatisticsCard(sessions: sessions),
                   const SizedBox(height: 100),
                 ],
               ),
@@ -165,8 +156,6 @@ class _ConstructionProgressScreenState extends State<ConstructionProgressScreen>
     );
   }
 }
-
-// --- STANDALONE WIDGET CLASSES (Fixes method definition errors) ---
 
 class ProgressCard extends StatelessWidget {
   final String title;
@@ -243,12 +232,10 @@ class _InteractiveFocusBarChartState extends State<InteractiveFocusBarChart> {
     for (var session in widget.sessions) {
       int dayIndex = session.date.weekday - 1;
       if (dayIndex >= 0 && dayIndex < 7) {
-        // Calculate cumulative minutes per day
         int currentMins = int.parse(dynamicData[dayIndex][1].split('h ')[0]) * 60 +
             int.parse(dynamicData[dayIndex][1].split('h ')[1].split('m')[0]);
         int totalMins = currentMins + session.duration;
 
-        // Normalize for graph height (assume 4 hours = max height)
         dynamicData[dayIndex][0] = (totalMins / 240).clamp(0.0, 1.0);
         dynamicData[dayIndex][1] = "${totalMins ~/ 60}h ${totalMins % 60}m";
 
@@ -302,8 +289,6 @@ class _InteractiveFocusBarChartState extends State<InteractiveFocusBarChart> {
       ],
     );
   }
-
-  // --- CHART HELPERS (UNCHANGED DESIGN) ---
 
   Widget _buildBar({required int index, required List<dynamic> data, required double maxChartHeight}) {
     final double normalizedHeight = data[0] * maxChartHeight;
