@@ -52,16 +52,17 @@
 * **Issue**: Some Firebase Authentication features (Google Sign-In, Password Reset links) are tied to the SHA-1 fingerprint of the development machine's debug keystore. When running the app on a different computer, these features may not work because Firebase doesn't recognize the new machine's SHA-1 key.
 * **Affected Features**: Forgot Password (email reset links) & Google Sign-In
 * **Solution**: Add the new machine's SHA-1 fingerprint to Firebase Console.
-  - Step 1: Get SHA-1 from the new machine by running:
-    Mac/Linux: keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
-    Windows: keytool -list -v -keystore %USERPROFILE%\.android\debug.keystore -alias androiddebugkey -storepass android -keypass android
+  - Step 1:
+    - Get SHA-1 from the new machine by running:
+    - Mac/Linux: keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
+    - Windows: keytool -list -v -keystore %USERPROFILE%\.android\debug.keystore -alias androiddebugkey -storepass android -keypass android
 
-  - Step 2: Add the SHA-1 to Firebase:
-    Go to Firebase Console → Project Settings
-    Select the Android app
-    Click "Add fingerprint"
-    Paste the SHA-1 key
-    Download the updated google-services.json and replace it in the project
+  - Step 2 - Add the SHA-1 to Firebase:
+    - Go to Firebase Console → Project Settings
+    - Select the Android app
+    - Click "Add fingerprint"
+    - Paste the SHA-1 key
+    - Download the updated google-services.json and replace it in the project
 
 **Note**: This is a standard Firebase security feature, not a bug. Each development machine needs its SHA-1 registered for full authentication functionality.
 
