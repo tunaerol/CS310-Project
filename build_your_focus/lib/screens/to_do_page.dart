@@ -80,10 +80,10 @@ class _toDoPageState extends State<toDoPage> {
                   _buildTaskInput(),
                   const SizedBox(height: 25),
                   _buildSectionHeader('In progress', inProgressTasks.length),
-                  ...inProgressTasks.map((task) => _buildTaskTile(task)).toList(),
+                  ...inProgressTasks.map((task) => _buildTaskTile(task)),
                   const SizedBox(height: 30),
                   _buildSectionHeader('Completed', completedTasks.length),
-                  ...completedTasks.map((task) => _buildTaskTile(task)).toList(),
+                  ...completedTasks.map((task) => _buildTaskTile(task)),
                 ],
               );
             },

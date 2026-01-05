@@ -8,9 +8,9 @@ class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final String? currentRoute = ModalRoute.of(context)?.settings.name;
-    final AuthService _authService = AuthService();
+    final AuthService authService = AuthService();
 
-    final String userName = _authService.currentUser?.displayName ?? "User";
+    final String userName = authService.currentUser?.displayName ?? "User";
 
     const LinearGradient activeGradient = LinearGradient(
       colors: [Color(0xFFcdffd8), Color(0xFF94b9ff)],
@@ -182,7 +182,7 @@ class AppDrawer extends StatelessWidget {
                 children: [
                   TextButton.icon(
                     onPressed: () async {
-                      await _authService.signOut();
+                      await authService.signOut();
                       if (context.mounted) {
                         Navigator.pushNamedAndRemoveUntil(
                             context, '/login_page', (route) => false);

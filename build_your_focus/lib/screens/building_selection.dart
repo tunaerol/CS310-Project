@@ -79,7 +79,7 @@ class _BuildingSelectionScreenState extends State<BuildingSelectionScreen> {
                     if (hasActiveProject) ...[
                       _buildLabel("Current Project"),
                       const SizedBox(height: 12),
-                      _buildCurrentProjectCard(currentBuilding!, currentUserBuilding!),
+                      _buildCurrentProjectCard(currentBuilding, currentUserBuilding),
                       const SizedBox(height: 30),
                     ],
 
