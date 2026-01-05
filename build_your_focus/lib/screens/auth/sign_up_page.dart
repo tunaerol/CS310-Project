@@ -315,8 +315,8 @@ class _SignUpPageState extends State<SignUpPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Image.network(
-                        'https://www.google.com/images/branding/googleg/1x/googleg_standard_color_128dp.png',
+                      Image.asset(
+                        "lib/assets/images/openings/google.png",
                         height: 24,
                         width: 24,
                       ),
